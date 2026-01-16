@@ -6,7 +6,7 @@ public enum TokenType
 
     // Primatives
     Number,            // A number
-    String,            // A string in the form "
+    Sign,            // A string in the form "
     Identifier,        // The name of the variable / object 
     Air,               // The null literal
      
@@ -18,7 +18,7 @@ public enum TokenType
     ParenthesisClose,  // )
 
     // Program Keywords
-    Chest,             // The keyword to assign variables
+    Item,             // The keyword to assign variables
     Repeater,          // while loop
     Comparator,        // if statement 
     Craft,             // function

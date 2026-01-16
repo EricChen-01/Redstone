@@ -4,7 +4,7 @@ public static class Keywords
 {
     private static Dictionary<string, TokenType> KeywordsDictionary = new()
     {
-        {"chest", TokenType.Chest}, // variable
+        {"item", TokenType.Item}, // variable
         {"comparator", TokenType.Comparator}, // if
         {"repeater", TokenType.Repeater}, // while
         {"hopper", TokenType.Hooper}, // for loop

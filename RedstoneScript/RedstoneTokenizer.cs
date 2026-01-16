@@ -55,7 +55,7 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
-            // keywords like chest, repeater, etc
+            // keywords like item, repeater, etc
             else if (Keywords.TryGetKeyword(input, out var keywordType))
             {
                 tokens.Add(new Token(input, keywordType));
