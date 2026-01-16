@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Examples/">
+    <File Path="sample.rsd" />
+  </Folder>
+  <Project Path="RedstoneScript/RedstoneScript.csproj" />
+</Solution>
