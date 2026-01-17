@@ -6,7 +6,7 @@ public enum TokenType
 
     // Primatives
     Number,            // A number
-    Sign,            // A string in the form "
+    String,            // A string in the form "
     Identifier,        // The name of the variable / object 
     Air,               // The null literal
      
