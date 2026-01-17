@@ -3,11 +3,40 @@ using RedstoneScript.Interpreter;
 using RedstoneScript.Lexer;
 using RedstoneScript.AST.Parser;
 
-Console.WriteLine("Welcome to RedstoneScript CLI v0.0.1!");
-Console.WriteLine("Type 'exit' to quit.\n");
+static void ShowSplash()
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+
+    Console.WriteLine(@"
+██████╗ ███████╗██████╗ ███████╗████████╗ ██████╗ ███╗   ██╗███████╗
+██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗████╗  ██║██╔════╝
+██████╔╝█████╗  ██║  ██║███████╗   ██║   ██║   ██║██╔██╗ ██║█████╗  
+██╔══██╗██╔══╝  ██║  ██║╚════██║   ██║   ██║   ██║██║╚██╗██║██╔══╝  
+██║  ██║███████╗██████╔╝███████║   ██║   ╚██████╔╝██║ ╚████║███████╗
+╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝
+");
+
+    Console.ResetColor();
+
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.WriteLine("Welcome to Redstone CLI v0.0.1!");
+    Console.WriteLine("Type 'exit' to quit.\n");
+    Console.ResetColor();
+    Console.WriteLine();
+}
+
+ShowSplash();
 
 while (true)
 {
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.Write("[");
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.Write("Redstone");
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.Write("] ");
+    Console.ResetColor();
+
     Console.Write(">>> ");
     var input = Console.ReadLine();
 
@@ -32,11 +61,15 @@ while (true)
 
         var result = RedstoneInterpreter.EvaluateProgram(ast);
 
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine(result);
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"Error: {ex.Message}");
+        Console.ResetColor();
     }
 
     Console.WriteLine();
