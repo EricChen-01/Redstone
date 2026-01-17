@@ -1,14 +1,13 @@
-using System.Diagnostics.Tracing;
-using System.Reflection.Emit;
 using RedstoneScript.AST;
 
 namespace RedstoneScript.Interpreter;
 
 public class RedstoneInterpreter
 {
+
     public static RuntimeValue EvaluateProgram(ProgramNode programNode)
     {
-        RuntimeValue lastRuntimeValue = new AirValue();
+        RuntimeValue lastRuntimeValue = new NullValue();
 
         foreach (INode node in programNode.Nodes)
         {
@@ -23,10 +22,10 @@ public class RedstoneInterpreter
         return node.Type switch
         {
             NodeType.Program => Evaluate<ProgramNode>(node, EvaluateProgram),
-            NodeType.Identifier => throw new NotImplementedException(),
+            NodeType.Identifier => throw new NotImplementedException("Identifier is not implemented."),
             NodeType.NumericLiteral => Evaluate(node, (NumericExpressionNode node) => new NumberValue(node.Value)),
             NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, EvaluateBinaryExpression),
-            NodeType.NullLiteral => new AirValue(),
+            NodeType.NullLiteral => new NullValue(),
             _ => throw new InvalidOperationException($"Unexpected Node: {node.Type}. It could mean that it's not supported yet."),
         };
     }
@@ -81,7 +80,5 @@ public class RedstoneInterpreter
             $"Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
-
-
 
 }

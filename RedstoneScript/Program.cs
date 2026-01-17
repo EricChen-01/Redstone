@@ -17,6 +17,12 @@ while (true)
     if (input.Trim().ToLower() == "exit")
         break;
 
+    if (input.Trim() == "clear" || input.Trim() == "cls")
+    {
+        Console.Clear();
+        continue;
+    }
+
     try
     {
         var tokens = RedstoneTokenizer.Tokenize(input);

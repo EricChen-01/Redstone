@@ -96,7 +96,7 @@ public class RedstoneParser
                 var expression = ParseExpression();
                 Expect(TokenType.ParenthesisClose, "Unexpected token found. Expected closing parenthesis.");
                 return expression;
-            case TokenType.Air:
+            case TokenType.Null:
                 Advance();
                 return new NullExpressionNode();
             default:

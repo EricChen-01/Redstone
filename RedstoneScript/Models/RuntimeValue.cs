@@ -17,10 +17,10 @@ public abstract class RuntimeValue : IRuntimeValue
     public abstract override string ToString();
 }
 
-public class AirValue : RuntimeValue
+public class NullValue : RuntimeValue
 {
     public string value = "air";
-    public AirValue() : base(RuntimeValueType.Air)
+    public NullValue() : base(RuntimeValueType.Null)
     {
     }
 

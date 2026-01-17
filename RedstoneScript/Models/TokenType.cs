@@ -8,7 +8,7 @@ public enum TokenType
     Number,            // A number
     String,            // A string in the form "
     Identifier,        // The name of the variable / object 
-    Air,               // The null literal
+    Null,               // Air
      
 
     // Groupings + Operations
@@ -18,9 +18,9 @@ public enum TokenType
     ParenthesisClose,  // )
 
     // Program Keywords
-    Item,             // The keyword to assign variables
-    Repeater,          // while loop
-    Comparator,        // if statement 
-    Craft,             // function
-    Hooper,            // for loop
+    Variable,          // Item
+    While,             // Repeater
+    If,                // Comparator
+    Function,          // Craft
+    For,              // Hooper
 }

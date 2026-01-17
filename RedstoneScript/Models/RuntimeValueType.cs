@@ -2,6 +2,6 @@ namespace RedstoneScript.Interpreter;
 
 public enum RuntimeValueType
 {
-    Air,
+    Null,
     Number,
 }
