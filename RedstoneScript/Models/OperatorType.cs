@@ -5,13 +5,13 @@ namespace RedstoneScript;
 /// </summary>
 public static class OperatorType
 {
-    public static string ADDITION = "+";
+    public const string ADDITION = "+";
 
-    public static string SUBTRACTION = "-";
+    public const string SUBTRACTION = "-";
 
-    public static string MULTIPLICATION = "*";
+    public const string MULTIPLICATION = "*";
 
-    public static string DIVISION = "/";
+    public const string DIVISION = "/";
 
-    public static string MODULUS = "%";
+    public const string MODULUS = "%";
 }

@@ -24,8 +24,9 @@ while (true)
         var parser = new RedstoneParser(tokens);
         var ast = parser.ParseRoot();
 
-        Console.WriteLine("\nAST:");
-        Console.WriteLine(ast.ToString());
+        var result = RedstoneInterpreter.EvaluateProgram(ast);
+
+        Console.WriteLine(result);
     }
     catch (Exception ex)
     {
@@ -34,3 +35,4 @@ while (true)
 
     Console.WriteLine();
 }
+

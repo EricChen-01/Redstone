@@ -100,7 +100,7 @@ public class RedstoneParser
                 Advance();
                 return new NullExpressionNode();
             default:
-                throw new Exception($"Unhandled token: {token.Type}. Could it be that it's not supported yet?");
+                throw new Exception($"Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
     }
 
