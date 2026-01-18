@@ -27,6 +27,8 @@ static void ShowSplash()
 
 ShowSplash();
 
+Scope globalScope = new Scope();
+
 while (true)
 {
     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -58,8 +60,8 @@ while (true)
         
         var parser = new RedstoneParser(tokens);
         var ast = parser.ParseRoot();
-
-        var result = RedstoneInterpreter.EvaluateProgram(ast);
+        
+        var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine(result);

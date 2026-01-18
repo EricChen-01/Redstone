@@ -58,6 +58,22 @@ public class ProgramNode : INode
 
 }
 
+public class VariableDelarationNode : StatementNode
+{
+    string Identifier { get; }
+
+    bool IsConstant { get; }
+
+    ExpressionNode? Value { get; }
+
+    public VariableDelarationNode(string identifier, ExpressionNode? value, bool isConstant = false) : base(NodeType.VariableDeclaration)
+    {
+        Identifier = identifier;
+        IsConstant = isConstant;
+        Value = value;
+    }
+}
+
 public class BinaryExpressionNode : ExpressionNode
 {
     public ExpressionNode Left { get; init; }
@@ -111,7 +127,7 @@ public class IdentifierExpressionNode : ExpressionNode
 
 public class NullExpressionNode : ExpressionNode
 {
-    string Value { get; }= "Air"; // This is representing null.
+    public string Value { get; }= "air"; // This is representing null.
     
     public NullExpressionNode() : base(NodeType.NullLiteral)
     {}
@@ -119,5 +135,19 @@ public class NullExpressionNode : ExpressionNode
     public override string ToString()
     {
         return $"NullLiteral";
+    }
+}
+
+public class BooleanExpressionNode : ExpressionNode
+{   
+    public bool Value { get; }
+    public BooleanExpressionNode(bool value) : base(NodeType.BooleanLiteral)
+    {
+        Value = value;
+    }
+
+    public override string ToString()
+    {
+        return "Boolean";
     }
 }

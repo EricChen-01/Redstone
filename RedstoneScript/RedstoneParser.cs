@@ -32,9 +32,30 @@ public class RedstoneParser
     private INode ParseStatement()
     {
         // fallback.
-        return ParseExpression();
+        switch (Current().Type)
+        {
+            case TokenType.If:
+            case TokenType.Constant:
+                return ParseVariableDeclaration();
+            default:
+                return ParseExpression();
+        }
     }
 
+    private StatementNode ParseVariableDeclaration()
+    {
+        var isConstant = Advance().Type == TokenType.Constant;
+        var identifierName = Expect(TokenType.Identifier, "Expected a variable name.").Value;
+
+        // check if it's any of the keywords that are restricted
+        if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
+        {
+            throw new InvalidOperationException($"Cannot use reserved keyword: {matched}");
+        }
+
+    
+        throw new NotImplementedException("parsing variable declaration is not supported yet.");
+    }
 
     /// <summary>
     /// Parses an expression node category
@@ -99,11 +120,18 @@ public class RedstoneParser
             case TokenType.Null:
                 Advance();
                 return new NullExpressionNode();
+            case TokenType.True:
+                Advance();
+                return new BooleanExpressionNode(true);
+            case TokenType.False:
+                Advance();
+                return new BooleanExpressionNode(false);
             default:
                 throw new Exception($"Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
     }
 
+#region helpers
     private bool IsAtEnd() => Current().Type == TokenType.EOF;
 
     private Token Previous(){
@@ -158,4 +186,5 @@ public class RedstoneParser
             errorMessage ?? $"Expected {type}, got {Current().Type}"
         );
     }
+#endregion
 }

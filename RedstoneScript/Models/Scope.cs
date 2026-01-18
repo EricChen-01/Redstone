@@ -10,6 +10,7 @@ public sealed class Scope
     {
         Parent = null;
     }
+
     public Scope(Scope parent)
     {
         Parent = parent;
@@ -42,9 +43,9 @@ public sealed class Scope
     }
 
     /// <summary>
-    /// Gets a variable.
+    /// Resolves a variable by searching enclosing scopes and returning its value.
     /// </summary>
-    public RuntimeValue GetVariable(string name)
+    public RuntimeValue ResolveVariable(string name)
     {
         var whichScope = FindScope(name);
 

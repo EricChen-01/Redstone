@@ -9,7 +9,8 @@ public enum TokenType
     String,            // A string in the form "
     Identifier,        // The name of the variable / object 
     Null,               // Air
-     
+    True,               // On
+    False,              // Off
 
     // Groupings + Operations
     Operator,          // Mathmatical Operator such as +, -, *, /
@@ -19,6 +20,7 @@ public enum TokenType
 
     // Program Keywords
     Variable,          // Item
+    Constant,          // Bedrock
     While,             // Repeater
     If,                // Comparator
     Function,          // Craft

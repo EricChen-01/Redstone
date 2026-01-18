@@ -12,7 +12,10 @@ public static class Keywords
         {"repeater", TokenType.While},
         {"hopper", TokenType.For},
         {"craft", TokenType.Function},
-        {"air", TokenType.Null}
+        {"air", TokenType.Null},
+        {"on", TokenType.True},
+        {"off", TokenType.False},
+        {"bedrock", TokenType.Constant},
     };
 
     /// <summary>
@@ -25,6 +28,4 @@ public static class Keywords
     {
         return KeywordsDictionary.TryGetValue(key, out tokenType);
     }
-
-
 }

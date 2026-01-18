@@ -43,3 +43,17 @@ public class NumberValue : RuntimeValue
         return $"{Value}";
     }
 }
+
+public class BooleanValue : RuntimeValue
+{
+    bool Value { get; }
+    public BooleanValue(bool value) : base(RuntimeValueType.Boolean)
+    {
+        Value = value;
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+}

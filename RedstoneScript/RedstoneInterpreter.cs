@@ -5,35 +5,44 @@ namespace RedstoneScript.Interpreter;
 public class RedstoneInterpreter
 {
 
-    public static RuntimeValue EvaluateProgram(ProgramNode programNode)
+    public static RuntimeValue EvaluateProgram(ProgramNode programNode, Scope scope)
     {
         RuntimeValue lastRuntimeValue = new NullValue();
 
         foreach (INode node in programNode.Nodes)
         {
-            lastRuntimeValue = Evaluate(node);
+            lastRuntimeValue = Evaluate(node, scope);
         }
 
         return lastRuntimeValue;
     }
 
-    private static RuntimeValue Evaluate(INode node)
+    /// <summary>
+    /// Evaluates the current Node given the current scope.
+    /// </summary>
+    private static RuntimeValue Evaluate(INode node, Scope scope)
     {
         return node.Type switch
         {
-            NodeType.Program => Evaluate<ProgramNode>(node, EvaluateProgram),
-            NodeType.Identifier => throw new NotImplementedException("Identifier is not implemented."),
+            NodeType.Program => Evaluate<ProgramNode>(node, scope, EvaluateProgram),
+            NodeType.Identifier => Evaluate<IdentifierExpressionNode>(node, scope, EvaluateIdentifierExpression),
             NodeType.NumericLiteral => Evaluate(node, (NumericExpressionNode node) => new NumberValue(node.Value)),
-            NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, EvaluateBinaryExpression),
+            NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, scope, EvaluateBinaryExpression),
             NodeType.NullLiteral => new NullValue(),
+            NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
             _ => throw new InvalidOperationException($"Unexpected Node: {node.Type}. It could mean that it's not supported yet."),
         };
     }
  
-    private static RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode)
+    private static RuntimeValue EvaluateIdentifierExpression(IdentifierExpressionNode identifierExpressionNode, Scope scope)
     {
-        var left = Evaluate(binaryExpressionNode.Left);
-        var right = Evaluate(binaryExpressionNode.Right);
+        return scope.ResolveVariable(identifierExpressionNode.Name);
+    }
+
+    private static RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode, Scope scope)
+    {
+        var left = Evaluate(binaryExpressionNode.Left, scope);
+        var right = Evaluate(binaryExpressionNode.Right, scope);
 
         if (left is NumberValue l && right is NumberValue r)
         {
@@ -67,6 +76,27 @@ public class RedstoneInterpreter
         }
     }   
 
+    /// <summary>
+    /// Evaluate with a scope
+    /// </summary>
+    private static RuntimeValue Evaluate<TNode>(
+        INode node,
+        Scope scope,
+        Func<TNode, Scope, RuntimeValue> evaluator
+    )
+        where TNode : class, INode
+    {
+        if (node is TNode typedNode)
+            return evaluator(typedNode, scope);
+
+        throw new InvalidOperationException(
+            $"Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
+        );
+    }
+
+    /// <summary>
+    /// Evaluate without a scope
+    /// </summary>
     private static RuntimeValue Evaluate<TNode>(
         INode node,
         Func<TNode, RuntimeValue> evaluator
@@ -80,5 +110,4 @@ public class RedstoneInterpreter
             $"Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
-
 }
