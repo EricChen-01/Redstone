@@ -3,6 +3,7 @@ namespace RedstoneScript.Lexer;
 public enum TokenType
 {
     EOF,               // End of file
+    NewLine,           // New line indicator
 
     // Primatives
     Number,            // A number

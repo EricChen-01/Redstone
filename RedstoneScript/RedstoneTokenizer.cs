@@ -15,7 +15,9 @@ public partial class RedstoneTokenizer
         foreach(string line in allLines)
         {
             TokenizeLine(line, tokens);   
+            tokens.Add(new Token("\\n", TokenType.NewLine));
         }
+        
         // end of file token
         tokens.Add(new Token(string.Empty, TokenType.EOF));
 

@@ -34,7 +34,7 @@ public class RedstoneParser
         // fallback.
         switch (Current().Type)
         {
-            case TokenType.If:
+            case TokenType.Variable:
             case TokenType.Constant:
                 return ParseVariableDeclaration();
             default:
@@ -46,14 +46,42 @@ public class RedstoneParser
     {
         var isConstant = Advance().Type == TokenType.Constant;
         var identifierName = Expect(TokenType.Identifier, "Expected a variable name.").Value;
-
         // check if it's any of the keywords that are restricted
         if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
         {
             throw new InvalidOperationException($"Cannot use reserved keyword: {matched}");
         }
+        
+        // handle constant
+        // pattern below must happen.
+        // const variableName = ...
+        // pattern below cannot happen
+        // const varName
+        if (isConstant)
+        {
+            Expect(TokenType.Equals, "Expected an equal sign to the right of the variable.");
+            var expression = ParseExpression();
+            Expect(TokenType.NewLine, "Expected a new line character.");
+            return new VariableDelarationNode(identifierName, expression, true);
+        }
 
-    
+        // handle regular var declarations
+        // var varName = ...
+        // OR 
+        // var varName
+        if (Current().Type == TokenType.Equals)
+        {
+            Expect(TokenType.Equals);
+            var expression = ParseExpression();
+            Expect(TokenType.NewLine);   
+            return new VariableDelarationNode(identifierName, expression, isConstant); 
+        }else if(Current().Type == TokenType.NewLine)
+        {
+            Expect(TokenType.NewLine);   
+            return new VariableDelarationNode(identifierName, null, isConstant); 
+        }
+
+        // throw error
         throw new NotImplementedException("parsing variable declaration is not supported yet.");
     }
 
@@ -103,7 +131,7 @@ public class RedstoneParser
     private ExpressionNode ParsePrimaryExpression()
     {
         var token = Current();
-
+        
         switch (token.Type)
         {
             case TokenType.Number:
@@ -176,6 +204,14 @@ public class RedstoneParser
     private Token Current() => tokens[currentTokenIndex];
 
     private bool IsToken(TokenType tokenType, string value) => (Current().Type == tokenType) && (Current().Value == value); 
+
+    private void IgnoreNewLine()
+    {
+        while(Current().Type == TokenType.NewLine)
+        {
+            Advance();
+        }
+    }
 
     private Token Expect(TokenType type, string? errorMessage = null)
     {

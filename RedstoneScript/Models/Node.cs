@@ -60,11 +60,11 @@ public class ProgramNode : INode
 
 public class VariableDelarationNode : StatementNode
 {
-    string Identifier { get; }
+    public string Identifier { get; }
 
-    bool IsConstant { get; }
+    public bool IsConstant { get; }
 
-    ExpressionNode? Value { get; }
+    public ExpressionNode? Value { get; }
 
     public VariableDelarationNode(string identifier, ExpressionNode? value, bool isConstant = false) : base(NodeType.VariableDeclaration)
     {

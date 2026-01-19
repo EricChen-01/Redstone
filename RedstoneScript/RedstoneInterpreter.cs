@@ -30,7 +30,8 @@ public class RedstoneInterpreter
             NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, scope, EvaluateBinaryExpression),
             NodeType.NullLiteral => new NullValue(),
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
-            _ => throw new InvalidOperationException($"Unexpected Node: {node.Type}. It could mean that it's not supported yet."),
+            NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
+            _ => throw new InvalidOperationException($"Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet."),
         };
     }
  
@@ -75,6 +76,15 @@ public class RedstoneInterpreter
                 throw new InvalidOperationException($"Invalid Numeric Operation. {left.Value} {operatorSign} {right.Value}");
         }
     }   
+
+    private static RuntimeValue EvaluateVariableDeclarationStatement(VariableDelarationNode variableDelarationNode, Scope scope)
+    {
+        var name = variableDelarationNode.Identifier;
+        
+        var finalValue = variableDelarationNode.Value != null ? Evaluate(variableDelarationNode.Value, scope) : new NullValue();
+
+        return scope.DefineVariable(name, finalValue);
+    }
 
     /// <summary>
     /// Evaluate with a scope
