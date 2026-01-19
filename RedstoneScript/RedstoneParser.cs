@@ -19,8 +19,11 @@ public class RedstoneParser
         var statements = new List<INode>();
 
         while (!IsAtEnd())
-        {
+        {            
             statements.Add(ParseStatement());
+
+            IgnoreNewLine();
+            // if (IsAtEnd()) break; // stop at EOF
         }
 
         return new ProgramNode(statements);
@@ -46,6 +49,7 @@ public class RedstoneParser
     {
         var isConstant = Advance().Type == TokenType.Constant;
         var identifierName = Expect(TokenType.Identifier, "Expected a variable name.").Value;
+        
         // check if it's any of the keywords that are restricted
         if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
         {
