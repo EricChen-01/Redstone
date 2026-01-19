@@ -57,7 +57,6 @@ while (true)
     try
     {
         var tokens = RedstoneTokenizer.Tokenize(input);
-        
         var parser = new RedstoneParser(tokens);
         var ast = parser.ParseRoot();
         
@@ -75,5 +74,13 @@ while (true)
     }
 
     Console.WriteLine();
+}
+
+void PrintTokens(List<Token> tokens)
+{
+    foreach(Token token in tokens)
+    {
+        Console.WriteLine(token);
+    }
 }
 
