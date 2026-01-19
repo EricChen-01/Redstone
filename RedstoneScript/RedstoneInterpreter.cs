@@ -1,4 +1,5 @@
 using RedstoneScript.AST;
+using RedstoneScript.Lexer;
 
 namespace RedstoneScript.Interpreter;
 
@@ -31,7 +32,8 @@ public class RedstoneInterpreter
             NodeType.NullLiteral => new NullValue(),
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
             NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
-            _ => throw new InvalidOperationException($"Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet."),
+            NodeType.AssignmentExpression => Evaluate<AssignmentExpressionNode>(node, scope, EvaluateAssignmentExpression),
+            _ => throw new InvalidOperationException($"RedStone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n\t{node}"),
         };
     }
  
@@ -80,10 +82,24 @@ public class RedstoneInterpreter
     private static RuntimeValue EvaluateVariableDeclarationStatement(VariableDelarationNode variableDelarationNode, Scope scope)
     {
         var name = variableDelarationNode.Identifier;
-        
+
         var finalValue = variableDelarationNode.Value != null ? Evaluate(variableDelarationNode.Value, scope) : new NullValue();
 
         return scope.DefineVariable(name, finalValue);
+    }
+
+    private static RuntimeValue EvaluateAssignmentExpression(AssignmentExpressionNode assignmentExpressionNode, Scope scope)
+    {
+        switch (assignmentExpressionNode.LeftExpression)
+        {
+            case IdentifierExpressionNode identifier:
+                {
+                    var value = Evaluate(assignmentExpressionNode.RightExpression, scope);
+                    return scope.AssignVariable(identifier.Name, value);
+                }
+            default:
+                throw new NotSupportedException("Redstone Interpreter: Unexpected assignmentExpressionNode. Currently only supporting Identifiers.");
+        }
     }
 
     /// <summary>

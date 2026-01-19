@@ -13,6 +13,6 @@ public enum NodeType
     BinaryExpression,
     NullLiteral,
     BooleanLiteral,
-
+    AssignmentExpression,
     
 }

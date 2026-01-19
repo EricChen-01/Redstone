@@ -58,6 +58,8 @@ public class ProgramNode : INode
 
 }
 
+
+#region Statements
 public class VariableDelarationNode : StatementNode
 {
     public string Identifier { get; }
@@ -74,6 +76,9 @@ public class VariableDelarationNode : StatementNode
     }
 }
 
+#endregion
+
+#region Expressions
 public class BinaryExpressionNode : ExpressionNode
 {
     public ExpressionNode Left { get; init; }
@@ -151,3 +156,23 @@ public class BooleanExpressionNode : ExpressionNode
         return "Boolean";
     }
 }
+
+public class AssignmentExpressionNode : ExpressionNode
+{
+    public ExpressionNode LeftExpression { get; } // an expression because it will help support things like complexObject.foo = 3 + 3
+    
+    public ExpressionNode RightExpression { get; }
+
+    public AssignmentExpressionNode(ExpressionNode left, ExpressionNode right) : base(NodeType.AssignmentExpression)
+    {
+        LeftExpression = left;
+        RightExpression = right;
+    }
+
+    public override string ToString()
+    {
+        return $"AssignmentExpression: {LeftExpression} = {RightExpression}]";
+    }
+
+}
+#endregion

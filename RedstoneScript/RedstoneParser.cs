@@ -95,7 +95,7 @@ public class RedstoneParser
     /// <remarks></remarks>
     private ExpressionNode ParseExpression()
     {
-        return ParseAdditiveExpression();
+        return ParseAssignmentExpression();
     }
 
     private ExpressionNode ParseMultiplicitiveExpression()
@@ -127,6 +127,19 @@ public class RedstoneParser
             var operation = Advance().Value;
             var right = ParseMultiplicitiveExpression();
             left = new BinaryExpressionNode(left, right, operation);
+        }
+
+        return left;
+    }
+
+    private ExpressionNode ParseAssignmentExpression()
+    {
+        var left = ParseAdditiveExpression(); // in future we'll do objects parsing for this
+
+        if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
+        {
+            var right = ParseAssignmentExpression();
+            return new AssignmentExpressionNode(left, right);
         }
 
         return left;

@@ -38,6 +38,10 @@ public sealed class Scope
     public RuntimeValue AssignVariable(string name, RuntimeValue value)
     {
         var whichScope = FindScope(name);
+
+        if (Variables.ContainsKey(name))
+            throw new InvalidOperationException($"Cannot reassign '{name}' to new value as it's a bedrock.");
+
         whichScope.Variables[name] = value;
         return value;
     }
