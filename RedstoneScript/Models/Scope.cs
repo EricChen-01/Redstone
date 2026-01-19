@@ -4,7 +4,7 @@ public sealed class Scope
 {
     private Scope? Parent { get; }
 
-    private Dictionary<string, RuntimeValue> Variables { get; } = new Dictionary<string, RuntimeValue>();
+    private Dictionary<string, VariableEntry> Variables { get; } = new Dictionary<string, VariableEntry>();
 
     public Scope()
     {
@@ -20,11 +20,11 @@ public sealed class Scope
     /// Defines a new variable in the current scope.
     /// </summary>
     /// <exception cref="InvalidOperationException">If the variable name already exists in the scope</exception>
-    public RuntimeValue DefineVariable(string name, RuntimeValue value)
+    public RuntimeValue DefineVariable(string name, RuntimeValue value, bool isConstant)
     {
         if (Variables.ContainsKey(name))
-            throw new InvalidOperationException($"Variable '{name}' is already defined.");
-        Variables[name] = value;
+            throw new InvalidOperationException($"Redstone Interpreter: Variable '{name}' is already defined.");
+        Variables[name] = new VariableEntry(value, isConstant);
 
         return value;
     }
@@ -38,11 +38,13 @@ public sealed class Scope
     public RuntimeValue AssignVariable(string name, RuntimeValue value)
     {
         var whichScope = FindScope(name);
+        var variables = whichScope.Variables;
+        
+        // determine if it's a constant. if so throw error.
+        if (variables[name].IsConstant)
+            throw new InvalidOperationException($"Redstone Interpreter: Cannot reassign '{name}' to new value as it's a bedrock.");
 
-        if (Variables.ContainsKey(name))
-            throw new InvalidOperationException($"Cannot reassign '{name}' to new value as it's a bedrock.");
-
-        whichScope.Variables[name] = value;
+        whichScope.Variables[name].Value = value;
         return value;
     }
 
@@ -53,7 +55,7 @@ public sealed class Scope
     {
         var whichScope = FindScope(name);
 
-        return whichScope.Variables[name];
+        return whichScope.Variables[name].Value;
     }
 
     /// <summary>
@@ -70,6 +72,6 @@ public sealed class Scope
             return Parent.FindScope(variableName);
         }
 
-        throw new InvalidOperationException($"Could not find the specified variable: {variableName}");
+        throw new InvalidOperationException($"Redstone Interpreter: Could not find the specified variable: {variableName}");
     }
 }

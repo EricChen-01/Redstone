@@ -70,22 +70,23 @@ public class RedstoneInterpreter
                 return new NumberValue(left.Value * right.Value);
             case OperatorType.DIVISION:
                 if (right.Value == 0)
-                    throw new DivideByZeroException();
+                    throw new DivideByZeroException("Redstone Interpreter: Cannot divide by zero.");
                 return new NumberValue(left.Value / right.Value);
             case OperatorType.MODULUS:
                 return new NumberValue(left.Value % right.Value);
             default: 
-                throw new InvalidOperationException($"Invalid Numeric Operation. {left.Value} {operatorSign} {right.Value}");
+                throw new InvalidOperationException($"Redstone Interpreter: Invalid Numeric Operation. {left.Value} {operatorSign} {right.Value}");
         }
     }   
 
     private static RuntimeValue EvaluateVariableDeclarationStatement(VariableDelarationNode variableDelarationNode, Scope scope)
     {
         var name = variableDelarationNode.Identifier;
+        var isConstant = variableDelarationNode.IsConstant;
 
         var finalValue = variableDelarationNode.Value != null ? Evaluate(variableDelarationNode.Value, scope) : new NullValue();
 
-        return scope.DefineVariable(name, finalValue);
+        return scope.DefineVariable(name, finalValue, isConstant);
     }
 
     private static RuntimeValue EvaluateAssignmentExpression(AssignmentExpressionNode assignmentExpressionNode, Scope scope)
@@ -115,8 +116,7 @@ public class RedstoneInterpreter
         if (node is TNode typedNode)
             return evaluator(typedNode, scope);
 
-        throw new InvalidOperationException(
-            $"Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
+        throw new InvalidOperationException($"Redstone Interpreter: Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
 
@@ -132,8 +132,7 @@ public class RedstoneInterpreter
         if (node is TNode typedNode)
             return evaluator(typedNode);
 
-        throw new InvalidOperationException(
-            $"Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
+        throw new InvalidOperationException($"Redstone Interpreter: Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
 }

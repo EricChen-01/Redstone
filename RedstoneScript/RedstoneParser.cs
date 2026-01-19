@@ -53,7 +53,7 @@ public class RedstoneParser
         // check if it's any of the keywords that are restricted
         if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
         {
-            throw new InvalidOperationException($"Cannot use reserved keyword: {matched}");
+            throw new InvalidOperationException($"Redstone Node Parser: Cannot use reserved keyword: {matched}");
         }
         
         // handle constant
@@ -86,7 +86,7 @@ public class RedstoneParser
         }
 
         // throw error
-        throw new NotImplementedException("parsing variable declaration is not supported yet.");
+        throw new NotImplementedException("Redstone Node Parser: Parsing variable declaration is not supported yet.");
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public class RedstoneParser
             case TokenType.Number:
                 if (double.TryParse(Advance().Value, out double parsedDouble))
                     return new NumericExpressionNode(parsedDouble);
-                throw new InvalidOperationException("The parser tried to parse a TokenType.Number, but failed.");
+                throw new InvalidOperationException("Redstone Node Parser: The parser tried to parse a TokenType.Number, but failed.");
             case TokenType.Identifier:
                 return new IdentifierExpressionNode(Advance().Value);
             case TokenType.ParenthesisOpen:
@@ -172,7 +172,7 @@ public class RedstoneParser
                 Advance();
                 return new BooleanExpressionNode(false);
             default:
-                throw new Exception($"Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
+                throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
     }
 
@@ -182,7 +182,7 @@ public class RedstoneParser
     private Token Previous(){
         if (currentTokenIndex == 0)
         {
-            throw new IndexOutOfRangeException("No previous Token.");
+            throw new IndexOutOfRangeException("Redstone Node Parser: No previous Token.");
         } 
         return tokens[currentTokenIndex - 1];
     }
@@ -236,7 +236,7 @@ public class RedstoneParser
             return Advance();
 
         throw new Exception(
-            errorMessage ?? $"Expected {type}, got {Current().Type}"
+            errorMessage ?? $"Redstone Node Parser: Expected {type}, got {Current().Type}"
         );
     }
 #endregion

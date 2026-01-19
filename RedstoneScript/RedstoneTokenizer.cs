@@ -81,7 +81,7 @@ public partial class RedstoneTokenizer
             else
             {
                 Console.WriteLine("Unrecognized input in source: {0}", input);
-                throw new InvalidOperationException("Invalid Syntax");
+                throw new InvalidOperationException("Redstone Token Parser: Invalid Syntax");
             }
         }   
 
