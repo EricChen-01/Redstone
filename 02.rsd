@@ -7,5 +7,6 @@ item point = {
     foo ,
     complex : {
         bar : on
-    }
+    } , 
+    Air : air
 }
