@@ -2,17 +2,24 @@ namespace RedstoneScript.AST;
 
 public enum NodeType
 {
-    // Statements
+    // Root
     Program,
+    Keyword,
+
+    // Statements
     VariableDeclaration,
 
 
     // Expressions
     NumericLiteral,
-    Identifier,
-    BinaryExpression,
     NullLiteral,
     BooleanLiteral,
+
+    Identifier,
+
     AssignmentExpression,
-    
+    BinaryExpression,
+
+    ObjectLiteral,
+    Property,
 }

@@ -1,3 +1,5 @@
+using System.Reflection.Metadata;
+
 namespace RedstoneScript.AST;
 
 /// <summary>
@@ -171,8 +173,44 @@ public class AssignmentExpressionNode : ExpressionNode
 
     public override string ToString()
     {
-        return $"AssignmentExpression: {LeftExpression} = {RightExpression}]";
+        return $"AssignmentExpression: {LeftExpression} = {RightExpression}";
     }
 
 }
+
+public class ObjectExpressionNode : ExpressionNode
+{
+    public List<PropertyExpressionNode> Properties { get; }
+    
+
+    public ObjectExpressionNode(List<PropertyExpressionNode> properties) : base(NodeType.ObjectLiteral)
+    {
+        Properties = properties;
+    }
+
+    public override string ToString()
+    {
+        return $"Object";
+    }
+}
+
+public class PropertyExpressionNode : ExpressionNode
+{
+    public string Name { get; }
+
+    public ExpressionNode? Value { get; }
+
+    public PropertyExpressionNode(string name, ExpressionNode? value = null) : base(NodeType.Property)
+    {
+        Name = name;
+        Value = value;
+    }
+
+    public override string ToString()
+    {
+        return $"Property: {Name}: {Value}";
+    }
+
+}
+
 #endregion

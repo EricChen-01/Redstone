@@ -33,6 +33,7 @@ public class RedstoneInterpreter
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
             NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
             NodeType.AssignmentExpression => Evaluate<AssignmentExpressionNode>(node, scope, EvaluateAssignmentExpression),
+            NodeType.ObjectLiteral => Evaluate<ObjectExpressionNode>(node, scope, EvaluateObjectExpression),
             _ => throw new InvalidOperationException($"RedStone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n\t{node}"),
         };
     }
@@ -101,6 +102,21 @@ public class RedstoneInterpreter
             default:
                 throw new NotSupportedException("Redstone Interpreter: Unexpected assignmentExpressionNode. Currently only supporting Identifiers.");
         }
+    }
+
+    private static RuntimeValue EvaluateObjectExpression(ObjectExpressionNode objectExpressionNode, Scope scope)
+    {
+        var newObject = new ObjectValue(new Dictionary<string, RuntimeValue>());
+
+        foreach (PropertyExpressionNode property in objectExpressionNode.Properties)
+        {
+            var name = property.Name;
+            var value = property.Value;
+            var evaluatedValue = value != null ? Evaluate(value, scope) : scope.ResolveVariable(name); // handles { x } => { x : x } by searching x in the scope.
+            newObject.Properties[name] = evaluatedValue;
+        }
+
+        return newObject;
     }
 
     /// <summary>

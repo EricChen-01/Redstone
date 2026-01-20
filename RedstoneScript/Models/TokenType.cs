@@ -18,6 +18,12 @@ public enum TokenType
     Equals,            // =
     ParenthesisOpen,   // (
     ParenthesisClose,  // )
+    Comma,             // ,
+    Colon,             // :
+    BraceOpen,         // {
+    BraceClose,         // }
+    BracketOpen,        // [
+    BracketClose,       // ]
 
     // Program Keywords
     Variable,          // Item

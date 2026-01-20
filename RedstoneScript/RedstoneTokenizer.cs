@@ -31,7 +31,6 @@ public partial class RedstoneTokenizer
 
         foreach(string input in all)
         {
-            // parentheses
             if (input == "(")
             {
                 tokens.Add(new Token(input, TokenType.ParenthesisOpen));
@@ -43,14 +42,47 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
-            // operators
+            if (input == "[")
+            {
+                tokens.Add(new Token(input, TokenType.BracketOpen));
+                continue;
+            }
+            else if (input == "]")
+            {
+                tokens.Add(new Token(input, TokenType.BracketClose));
+                continue;
+            }
+
+            if (input == "{")
+            {
+                tokens.Add(new Token(input, TokenType.BraceOpen));
+                continue;
+            }
+            else if (input == "}")
+            {
+                tokens.Add(new Token(input, TokenType.BraceClose));
+                continue;
+            }
+
+            else if (input == ":")
+            {
+                tokens.Add(new Token(input, TokenType.Colon));
+                continue;
+            }
+
+            else if (input == ",")
+            {
+                tokens.Add(new Token(input, TokenType.Comma));
+                continue;
+            }
+
+            // math operators
             else if (input is "+" or "-" or "*" or "/" or "%")
             {
                 tokens.Add(new Token(input, TokenType.Operator));
                 continue;
             }
 
-            // equals
             else if (input == "=")
             {
                 tokens.Add(new Token(input, TokenType.Equals));

@@ -5,4 +5,5 @@ public enum RuntimeValueType
     Null,
     Number,
     Boolean,
+    Object,
 }

@@ -1,3 +1,5 @@
+using RedstoneScript.AST;
+
 namespace RedstoneScript.Interpreter;
 
 public interface IRuntimeValue
@@ -55,5 +57,29 @@ public class BooleanValue : RuntimeValue
     public override string ToString()
     {
         return Value.ToString();
+    }
+}
+
+public class ObjectValue : RuntimeValue
+{
+    public Dictionary<string, RuntimeValue> Properties { get; }
+    public ObjectValue(Dictionary<string, RuntimeValue> properties) : base(RuntimeValueType.Object)
+    {
+        Properties = properties;
+    }
+
+    public override string ToString()
+    {
+        if (Properties.Count == 0)
+            return "{}";
+
+        var parts = Properties.Select(kv =>
+        {
+            var key = kv.Key;
+            var value = kv.Value?.ToString() ?? "null"; // handle null values
+            return $"{key}: {value}";
+        });
+
+        return "{ " + string.Join(", ", parts) + " }";
     }
 }

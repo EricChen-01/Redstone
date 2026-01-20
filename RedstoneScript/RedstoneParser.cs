@@ -2,6 +2,34 @@ using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
 
+// Expression Precedence (lowest → highest)
+//
+// 1. AssignmentExpression        (=)
+// 2. LogicalOrExpression         (||)
+// 3. LogicalAndExpression        (&&)
+// 4. EqualityExpression          (==, !=)
+// 5. RelationalExpression        (<, <=, >, >=)
+// 6. AdditiveExpression          (+, -)
+// 7. MultiplicativeExpression    (*, /, %)
+// 8. UnaryExpression             (!, -)
+// 9. CallExpression              (func(), obj.method())
+//10. PropertyExpression            (obj.prop)
+//11. PrimaryExpression           (literals, identifiers, grouping, object literals)
+
+// Statement Precedence / Structural Order (outer → inner)
+//
+// 1. Program
+// 2. BlockStatement
+// 3. VariableDeclarationStatement
+// 4. FunctionDeclarationStatement
+// 5. ClassDeclarationStatement
+// 6. IfStatement
+// 7. WhileStatement
+// 8. ForStatement
+// 9. ReturnStatement
+//10. ExpressionStatement
+
+
 public class RedstoneParser
 {
     private List<Token> tokens = new();
@@ -134,7 +162,7 @@ public class RedstoneParser
 
     private ExpressionNode ParseAssignmentExpression()
     {
-        var left = ParseAdditiveExpression(); // in future we'll do objects parsing for this
+        var left = ParseObjectExpression();
 
         if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
         {
@@ -144,6 +172,62 @@ public class RedstoneParser
 
         return left;
     }
+
+    private ExpressionNode ParseObjectExpression()
+    {
+        if (!Match(TokenType.BraceOpen)) // if not a { then proceed to do expressions.
+        {
+            return ParseAdditiveExpression();
+        }
+
+        // if we're here then we have just advanced past the {
+        var properties = new List<PropertyExpressionNode>();
+
+        // expect a new line character
+        Expect(TokenType.NewLine, "New line character expected for a object expression.");
+
+        // { key }
+        while (!Check(TokenType.BraceClose)) // loop and parse while it's not end of file or a }
+        {
+            // // redstone is a new line sensative language so after {, it should expect a new line character.
+            properties.Add(ParsePropertyExpression());
+            
+            // After a property, match any new lines
+            if (!Match(TokenType.Comma)) // no comma it means it's the last property.
+            {
+                // After a property, match a new line.
+                while (Match(TokenType.NewLine)) { }
+
+                break;
+            }
+            else
+            {
+                 // if there is a comma, then we should expect a new line right after it.
+                while (Match(TokenType.NewLine)) { }
+            }            
+        }
+
+        Expect(TokenType.BraceClose);
+
+        return new ObjectExpressionNode(properties);
+    }
+
+    private PropertyExpressionNode ParsePropertyExpression()
+    {
+        var propertyName = Expect(TokenType.Identifier, $"Redstone Node Parser: property name must be of type identifier. Got: {Current().Type}").Value;
+
+        // a property should have this format
+        // key: value,
+        if (Match(TokenType.Colon))
+        {
+            var value = ParseExpression(); // aparently key: x = y + 1 is valid LOL
+            return new PropertyExpressionNode(propertyName, value);
+        }
+
+        // shorthand { key }
+        return new PropertyExpressionNode(propertyName);
+    }
+
 
     private ExpressionNode ParsePrimaryExpression()
     {
