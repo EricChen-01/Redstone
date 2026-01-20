@@ -1,0 +1,58 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "RedstoneScript",
+	"patterns": [
+		{ "include": "#keywords" },
+		{ "include": "#numbers" },
+		{ "include": "#strings" },
+		{ "include": "#comments" },
+		{ "include": "#operators" },
+		{ "include": "#objects" }
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.rsd",
+					"match": "\\b(item|bedrock|run|exit)\\b"
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [
+				{
+				"name": "constant.numeric.rsd",
+				"match": "\\b\\d+(\\.\\d+)?\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.rsd",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.rsd",
+					"match": "\\\\."
+				}
+			]
+		},
+		"operators": {
+			"patterns": [
+				{
+				"name": "keyword.operator.rsd",
+				"match": "[+\\-*/%=]"
+				}
+			]
+		},
+		"objects": {
+			"patterns": [
+				{
+				"name": "variable.other.object.rsd",
+				"match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.redstone"
+}

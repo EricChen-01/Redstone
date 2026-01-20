@@ -1,0 +1,26 @@
+{
+  "name": "redstone",
+  "displayName": "Redstone",
+  "description": "Redstone scripting language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "publisher": "EricChen",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "rsd",
+      "aliases": ["RedstoneScript", "rsd"],
+      "extensions": [".rsd"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "rsd",
+      "scopeName": "source.redstone",
+      "path": "./syntaxes/rsd.tmLanguage.json"
+    }]
+  }
+}

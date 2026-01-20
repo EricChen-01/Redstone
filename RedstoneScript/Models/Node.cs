@@ -137,10 +137,10 @@ public class BinaryExpressionNode : ExpressionNode
     {
         return
     $@"{AstPrinter.Indent(indent)}BinaryExpression ({Operator})
-{AstPrinter.Indent(indent + 1)}Left:
-{AstPrinter.Indent(indent + 2)}{Left}
-{AstPrinter.Indent(indent + 1)}Right:
-{AstPrinter.Indent(indent + 2)}{Right}";
+        {AstPrinter.Indent(indent + 1)}Left:
+        {AstPrinter.Indent(indent + 2)}{Left}
+        {AstPrinter.Indent(indent + 1)}Right:
+        {AstPrinter.Indent(indent + 2)}{Right}";
     }
 
 }

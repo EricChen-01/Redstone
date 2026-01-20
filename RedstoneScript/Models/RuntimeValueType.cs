@@ -6,4 +6,6 @@ public enum RuntimeValueType
     Number,
     Boolean,
     Object,
+    NativeFunction,
+    Function,
 }

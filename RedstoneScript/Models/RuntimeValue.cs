@@ -83,3 +83,20 @@ public class ObjectValue : RuntimeValue
         return "{ " + string.Join(", ", parts) + " }";
     }
 }
+
+public class NativeFunctionValue : RuntimeValue
+{
+    public Func<List<RuntimeValue>, Scope, RuntimeValue> FunctionCall { get; }
+
+    public NativeFunctionValue(Func<List<RuntimeValue>, Scope, RuntimeValue> function) 
+        : base(RuntimeValueType.NativeFunction)
+    {
+        FunctionCall = function;
+    }
+
+    public override string ToString()
+    {
+        return "<native function>";
+    }
+}
+

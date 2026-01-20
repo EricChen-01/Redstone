@@ -9,6 +9,7 @@ public sealed class Scope
     public Scope()
     {
         Parent = null;
+        AddNativeFunctions();
     }
 
     public Scope(Scope parent)
@@ -16,6 +17,12 @@ public sealed class Scope
         Parent = parent;
     } 
 
+    private void AddNativeFunctions()
+    {
+        Variables.Add("chat", new VariableEntry(new NativeFunctionValue(NativeFunctions.Print), true));
+    }
+
+#region helpers
     /// <summary>
     /// Defines a new variable in the current scope.
     /// </summary>
@@ -74,4 +81,5 @@ public sealed class Scope
 
         throw new InvalidOperationException($"Redstone Interpreter: Could not find the specified variable: {variableName}");
     }
+#endregion
 }

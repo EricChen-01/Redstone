@@ -126,7 +126,8 @@ while (true)
         var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
 
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(result);
+
+        Console.WriteLine(result);   
         Console.ResetColor();
     }
     catch (Exception ex)

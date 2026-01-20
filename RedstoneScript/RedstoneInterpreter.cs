@@ -34,6 +34,7 @@ public class RedstoneInterpreter
             NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
             NodeType.AssignmentExpression => Evaluate<AssignmentExpressionNode>(node, scope, EvaluateAssignmentExpression),
             NodeType.ObjectLiteral => Evaluate<ObjectExpressionNode>(node, scope, EvaluateObjectExpression),
+            NodeType.CallExpression => Evaluate<CallExpressionNode>(node, scope, EvaluateCallExpression),
             _ => throw new InvalidOperationException($"RedStone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n\t{node}"),
         };
     }
@@ -117,6 +118,27 @@ public class RedstoneInterpreter
         }
 
         return newObject;
+    }
+
+    private static RuntimeValue EvaluateCallExpression(CallExpressionNode callExpressionNode, Scope scope)
+    {
+        List<RuntimeValue> arguments = callExpressionNode.Arguments
+            .Select(arg => Evaluate(arg, scope))
+            .ToList();
+        
+        var functionValue = Evaluate(callExpressionNode.RightCallExpression, scope);
+
+        if (functionValue.Type != RuntimeValueType.NativeFunction && functionValue.Type != RuntimeValueType.Function)
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: {functionValue} is not a function.");
+        }
+
+        if (functionValue is NativeFunctionValue nativeFunction)
+        {
+            return nativeFunction.FunctionCall(arguments, scope);
+        }
+
+        throw new NotImplementedException("Native function calls are only supported.");
     }
 
     /// <summary>
