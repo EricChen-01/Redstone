@@ -4,7 +4,6 @@ public enum NodeType
 {
     // Root
     Program,
-    Keyword,
 
     // Statements
     VariableDeclaration,

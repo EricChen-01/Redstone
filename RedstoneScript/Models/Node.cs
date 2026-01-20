@@ -1,4 +1,5 @@
 using System.Reflection.Metadata;
+using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST;
 
@@ -59,7 +60,6 @@ public class ProgramNode : INode
     }
 
 }
-
 
 #region Statements
 public class VariableDelarationNode : StatementNode

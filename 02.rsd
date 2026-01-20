@@ -1,4 +1,4 @@
-bedrock foo = false
+bedrock foo = off
 
 item point = {
     x : 100 ,
@@ -6,6 +6,6 @@ item point = {
     z : 0 ,
     foo ,
     complex : {
-        bar : true
+        bar : on
     }
 }
