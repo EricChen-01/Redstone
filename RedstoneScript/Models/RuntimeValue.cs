@@ -56,7 +56,7 @@ public class BooleanValue : RuntimeValue
 
     public override string ToString()
     {
-        return Value.ToString();
+        return Value ? "on" : "off";
     }
 }
 
