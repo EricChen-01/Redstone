@@ -42,7 +42,7 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
-            if (input == "[")
+            else if (input == "[")
             {
                 tokens.Add(new Token(input, TokenType.BracketOpen));
                 continue;
@@ -53,7 +53,7 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
-            if (input == "{")
+            else if (input == "{")
             {
                 tokens.Add(new Token(input, TokenType.BraceOpen));
                 continue;
@@ -61,6 +61,12 @@ public partial class RedstoneTokenizer
             else if (input == "}")
             {
                 tokens.Add(new Token(input, TokenType.BraceClose));
+                continue;
+            }
+
+            else if (input == ".")
+            {
+                tokens.Add(new Token(".", TokenType.Dot));
                 continue;
             }
 

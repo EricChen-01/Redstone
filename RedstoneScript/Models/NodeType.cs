@@ -21,4 +21,6 @@ public enum NodeType
 
     ObjectLiteral,
     Property,
+    MemberAccessExpression,
+    CallExpression,
 }

@@ -24,6 +24,7 @@ public enum TokenType
     BraceClose,         // }
     BracketOpen,        // [
     BracketClose,       // ]
+    Dot,                // . 
 
     // Program Keywords
     Variable,          // Item

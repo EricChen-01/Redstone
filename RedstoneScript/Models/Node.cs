@@ -1,4 +1,5 @@
 using System.Reflection.Metadata;
+using System.Text;
 using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST;
@@ -9,6 +10,7 @@ namespace RedstoneScript.AST;
 public interface INode
 {
     public NodeType Type {get; }
+    string ToString(int indent);
 }
 
 /// <summary>
@@ -23,7 +25,10 @@ public abstract class ExpressionNode : INode
         Type = type;
     }
 
-    public abstract override string ToString();
+    public override string ToString()
+        => ToString(0);
+
+    public abstract string ToString(int indent);
 }
 
 /// <summary>
@@ -37,6 +42,11 @@ public abstract class StatementNode : INode
     {
         Type = type;
     }
+
+    public override string ToString()
+        => ToString(0);
+
+    public abstract string ToString(int indent);
 }
 
 /// <summary>
@@ -55,8 +65,20 @@ public class ProgramNode : INode
 
     public override string ToString()
     {
-        var childStrings = string.Join(", ", Nodes.Select(n => n.ToString()));
-        return $"RootNode: [{childStrings}]";
+        return ToString(0);
+    }
+
+    public string ToString(int indent)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"{AstPrinter.Indent(indent)}Program");
+
+        foreach (var node in Nodes)
+        {
+            sb.AppendLine(node.ToString(indent + 1));
+        }
+
+        return sb.ToString().TrimEnd();
     }
 
 }
@@ -76,6 +98,21 @@ public class VariableDelarationNode : StatementNode
         IsConstant = isConstant;
         Value = value;
     }
+
+    public override string ToString(int indent)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"{AstPrinter.Indent(indent)}VarDeclaration {Identifier}");
+
+        if (Value != null)
+        {
+            sb.AppendLine($"{AstPrinter.Indent(indent + 1)}Value:");
+            sb.AppendLine(Value.ToString(indent + 2));
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
 }
 
 #endregion
@@ -96,10 +133,16 @@ public class BinaryExpressionNode : ExpressionNode
         Operator = expressionOperator;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"BinaryExpression ({Operator}): [Left: {Left}, Right: {Right}]";
+        return
+    $@"{AstPrinter.Indent(indent)}BinaryExpression ({Operator})
+{AstPrinter.Indent(indent + 1)}Left:
+{AstPrinter.Indent(indent + 2)}{Left}
+{AstPrinter.Indent(indent + 1)}Right:
+{AstPrinter.Indent(indent + 2)}{Right}";
     }
+
 }
 
 public class NumericExpressionNode : ExpressionNode
@@ -111,10 +154,11 @@ public class NumericExpressionNode : ExpressionNode
         Value = value;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"NumericLiteral {Value}";
+        return $"{AstPrinter.Indent(indent)}Number({Value})";
     }
+
 }
 
 public class IdentifierExpressionNode : ExpressionNode
@@ -126,9 +170,9 @@ public class IdentifierExpressionNode : ExpressionNode
         Name = name;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"Identifier {Name}";
+        return $"{AstPrinter.Indent(indent)}Identifier({Name})";
     }
 }
 
@@ -139,9 +183,9 @@ public class NullExpressionNode : ExpressionNode
     public NullExpressionNode() : base(NodeType.NullLiteral)
     {}
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"NullLiteral";
+        return $"{AstPrinter.Indent(indent)}Null";
     }
 }
 
@@ -153,9 +197,9 @@ public class BooleanExpressionNode : ExpressionNode
         Value = value;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return "Boolean";
+        return $"{AstPrinter.Indent(indent)}Boolean({Value})";
     }
 }
 
@@ -171,10 +215,16 @@ public class AssignmentExpressionNode : ExpressionNode
         RightExpression = right;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"AssignmentExpression: {LeftExpression} = {RightExpression}";
+        return
+    $@"{AstPrinter.Indent(indent)}Assignment
+{AstPrinter.Indent(indent + 1)}Target:
+{AstPrinter.Indent(indent + 2)}{LeftExpression}
+{AstPrinter.Indent(indent + 1)}Value:
+{AstPrinter.Indent(indent + 2)}{RightExpression}";
     }
+
 
 }
 
@@ -188,10 +238,19 @@ public class ObjectExpressionNode : ExpressionNode
         Properties = properties;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"Object";
+    var sb = new StringBuilder();
+    sb.AppendLine($"{AstPrinter.Indent(indent)}ObjectLiteral");
+
+    foreach (var prop in Properties)
+    {
+        sb.AppendLine(prop.ToString(indent + 1));
     }
+
+    return sb.ToString().TrimEnd();
+}
+
 }
 
 public class PropertyExpressionNode : ExpressionNode
@@ -206,11 +265,85 @@ public class PropertyExpressionNode : ExpressionNode
         Value = value;
     }
 
-    public override string ToString()
+    public override string ToString(int indent)
     {
-        return $"Property: {Name}: {Value}";
+        if (Value == null)
+            return $"{AstPrinter.Indent(indent)}Property({Name})";
+
+        return
+    $@"{AstPrinter.Indent(indent)}Property({Name})
+{Value.ToString(indent + 1)}";
     }
 
+
+}
+
+public class MemberAccessExpression : ExpressionNode
+{
+    public ExpressionNode Object { get; } // we are using Expression because it could be getObject().x, where the object first needs to be evaluated from an expression.
+
+    public ExpressionNode Property { get; }
+
+    public MemberAccessExpression(ExpressionNode objectNode, ExpressionNode property) : base(NodeType.MemberAccessExpression)
+    {
+        Object = objectNode;
+        Property = property;
+    }
+
+    public override string ToString(int indent)
+    {
+        return
+    $@"{AstPrinter.Indent(indent)}MemberAccess
+{AstPrinter.Indent(indent + 1)}Object:
+{AstPrinter.Indent(indent + 2)}{Object}
+{AstPrinter.Indent(indent + 1)}Property:
+{AstPrinter.Indent(indent + 2)}{Property}";
+    }
+
+
+}
+
+public class CallExpressionNode : ExpressionNode
+{
+    public ExpressionNode RightCallExpression { get; }
+
+    public List<ExpressionNode> Arguments { get; }
+
+    public CallExpressionNode(ExpressionNode rightCallExpression, List<ExpressionNode> arguments) : base(NodeType.CallExpression)
+    {
+        RightCallExpression = rightCallExpression;
+        Arguments = arguments;
+    }
+
+    public override string ToString(int indent)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"{AstPrinter.Indent(indent)}CallExpression");
+        sb.AppendLine($"{AstPrinter.Indent(indent + 1)}Callee:");
+        sb.AppendLine($"{AstPrinter.Indent(indent + 2)}{RightCallExpression}");
+
+        if (Arguments.Count > 0)
+        {
+            sb.AppendLine($"{AstPrinter.Indent(indent)}Arguments:");
+            foreach (var arg in Arguments)
+            {
+                sb.AppendLine($"{AstPrinter.Indent(indent + 2)}{arg}");
+            }
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+
+}
+
+#endregion
+
+#region Helpers
+public static class AstPrinter
+{
+    public static string Indent(int level)
+        => new string(' ', level * 2);
 }
 
 #endregion

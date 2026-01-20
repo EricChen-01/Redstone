@@ -25,7 +25,7 @@ static void ShowSplash()
     Console.WriteLine();
 }
 
-static void RunFile(string input, Scope scope)
+static string? GetFile(string input)
 {
     // Extract the file path after "run"
     var parts = input.Trim().Split(' ', 2); // split into ["run", "filepath"]
@@ -34,33 +34,21 @@ static void RunFile(string input, Scope scope)
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("Usage: run <file_path>");
         Console.ResetColor();
-        return;
+        return null;
     }
 
     var filePath = parts[1].Trim();
-
+    string? source = null;
     if (File.Exists(filePath))
     {
         try
         {
-            var source = File.ReadAllText(filePath);
-            var tokens = RedstoneTokenizer.Tokenize(source);
-            var parser = new RedstoneParser(tokens);
-            var ast = parser.ParseRoot();
-
-            var result = RedstoneInterpreter.EvaluateProgram(ast, scope);
-
-            if (result != null)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(result);
-                Console.ResetColor();
-            }
+            source = File.ReadAllText(filePath);
         }
         catch (Exception ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Error executing file {filePath}: {ex.Message}");
+            Console.WriteLine($"Error reading file {filePath}: {ex.Message}");
             Console.ResetColor();
         }
     }
@@ -70,11 +58,14 @@ static void RunFile(string input, Scope scope)
         Console.WriteLine($"File not found: {filePath}");
         Console.ResetColor();
     }
+
+    return source;
 }
 
 ShowSplash();
 
 Scope globalScope = new Scope();
+bool showAst = false;
 
 while (true)
 {
@@ -100,19 +91,38 @@ while (true)
         Console.Clear();
         continue;
     }
+
+    if (input.Trim() == "debug")
+    {
+        showAst = true;
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Debug on.");
+        Console.ResetColor();
+        continue;
+    }
     
     try
     {
         if (input.TrimStart().StartsWith("run"))
         {
-            RunFile(input, globalScope);
-            continue;
+            input = GetFile(input);
+            if (input == null)
+            {
+                continue;
+            }
         }
 
         var tokens = RedstoneTokenizer.Tokenize(input);
         var parser = new RedstoneParser(tokens);
         var ast = parser.ParseRoot();
-        
+
+        if (showAst)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(ast);
+            Console.ResetColor();
+        }
+
         var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
 
         Console.ForegroundColor = ConsoleColor.Green;

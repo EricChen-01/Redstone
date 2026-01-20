@@ -2,34 +2,6 @@ using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
 
-// Expression Precedence (lowest → highest)
-//
-// 1. AssignmentExpression        (=)
-// 2. LogicalOrExpression         (||)
-// 3. LogicalAndExpression        (&&)
-// 4. EqualityExpression          (==, !=)
-// 5. RelationalExpression        (<, <=, >, >=)
-// 6. AdditiveExpression          (+, -)
-// 7. MultiplicativeExpression    (*, /, %)
-// 8. UnaryExpression             (!, -)
-// 9. CallExpression              (func(), obj.method())
-//10. PropertyExpression            (obj.prop)
-//11. PrimaryExpression           (literals, identifiers, grouping, object literals)
-
-// Statement Precedence / Structural Order (outer → inner)
-//
-// 1. Program
-// 2. BlockStatement
-// 3. VariableDeclarationStatement
-// 4. FunctionDeclarationStatement
-// 5. ClassDeclarationStatement
-// 6. IfStatement
-// 7. WhileStatement
-// 8. ForStatement
-// 9. ReturnStatement
-//10. ExpressionStatement
-
-
 public class RedstoneParser
 {
     private List<Token> tokens = new();
@@ -128,7 +100,7 @@ public class RedstoneParser
 
     private ExpressionNode ParseMultiplicitiveExpression()
     {
-        var left = ParsePrimaryExpression();
+        var left = ParseMemberCallExpression();
 
         while(
             IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
@@ -136,7 +108,7 @@ public class RedstoneParser
             IsToken(TokenType.Operator, OperatorType.MODULUS))
         {
             var operation = Advance().Value;
-            var right = ParsePrimaryExpression();
+            var right = ParseMemberCallExpression();
             left = new BinaryExpressionNode(left, right, operation);
         }
 
@@ -228,7 +200,6 @@ public class RedstoneParser
         return new PropertyExpressionNode(propertyName);
     }
 
-
     private ExpressionNode ParsePrimaryExpression()
     {
         var token = Current();
@@ -258,6 +229,72 @@ public class RedstoneParser
             default:
                 throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
+    }
+
+    private ExpressionNode ParseCallExpression(ExpressionNode memberCall)
+    {
+        ExpressionNode callExpression = new CallExpressionNode(memberCall, ParseCallArguments());
+
+        if (Match(TokenType.ParenthesisOpen))
+        {
+            callExpression = ParseCallExpression(callExpression);
+        }
+
+        return callExpression;
+    }
+
+    private ExpressionNode ParseMemberCallExpression()
+    {
+        var member = ParseMemberExpression();
+
+        if (Match(TokenType.ParenthesisOpen))
+        {
+            return ParseCallExpression(member);
+        }
+
+        return member;
+    }
+
+    private ExpressionNode ParseMemberExpression()
+    {
+        var objectNode = ParsePrimaryExpression();
+
+        while (Match(TokenType.Dot))
+        {
+            var property = ParsePrimaryExpression(); // should be an identifier.
+
+            if (property.Type != NodeType.Identifier)
+            {
+                throw new InvalidOperationException($"Redstone Parser: Expected a NodeType.Identifier. Got: {property.Type}");
+            }
+
+            objectNode = new MemberAccessExpression(objectNode, property);
+        }
+
+        return objectNode;
+    }
+
+    private List<ExpressionNode> ParseCallArguments()
+    {
+        List<ExpressionNode> argumentsList = Current().Type == TokenType.ParenthesisClose ? new List<ExpressionNode>() : ParseCallArgumentsList();
+        
+        Expect(TokenType.ParenthesisClose);
+
+        return argumentsList; 
+    }
+
+    private List<ExpressionNode> ParseCallArgumentsList()
+    {
+        List<ExpressionNode> arguments = new List<ExpressionNode>();
+
+        arguments.Add(ParseExpression()); // parse the first arguent
+
+        while (Match(TokenType.Comma)) // while there is a comma, consume it 
+        {
+            arguments.Add(ParseExpression());
+        }
+
+        return arguments;
     }
 
 #region helpers

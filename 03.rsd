@@ -1,14 +1,14 @@
 item point1 = {
-    x : 100,
+    x : 100 ,
     y : 100
 }
 
 item point2 = {
-    x : 100,
+    x : 100 ,
     y : 101
 }
 
-item dx = point2.x - point1.x
-item dy = point2.y - point1.y
+item dx = point2 . x - point1 . x
+item dy = point2 . y - point1 . y
 item distance = dx + dy
 distance
