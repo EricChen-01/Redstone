@@ -14,6 +14,14 @@ The goal of Redstone is to serve both as a learning project for language design 
 
 ---
 
+## Project Goals
+
+* Explore programming language design and implementation
+* Build a complete lexer-to-runtime pipeline
+* Keep the language readable, themed, and easy to extend
+
+---
+
 ## Current Features
 
 * Numbers (integers and doubles)
@@ -76,12 +84,6 @@ This will compile the Redstone interpreter and all supporting projects.
 
 ## Running Redstone
 
-### Running the Interpreter
-
-```
-dotnet run
-```
-
 ### Running a Redstone Script
 
 ```
@@ -115,6 +117,13 @@ Example:
 
 ```
 abs(0 - 5)
+min(0,1)
+max(100,10)
+```
+
+You can also print to the console with this:
+```
+chat("Hello World")
 ```
 
 Additional native functions will be added over time.
@@ -132,15 +141,3 @@ Planned improvements include:
 * Expanded native function library
 
 ---
-
-## Project Goals
-
-* Explore programming language design and implementation
-* Build a complete lexer-to-runtime pipeline
-* Keep the language readable, themed, and easy to extend
-
----
-
-## Contributing
-
-Contributions, feedback, and feature ideas are welcome. Feel free to open an issue or submit a pull request.
