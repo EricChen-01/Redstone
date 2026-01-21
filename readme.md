@@ -1,7 +1,7 @@
 # Redstone Scripting Language
 
 <p align="center">
-  <img src="./redstone.webp" alt="Redstone Logo" width="300" />
+  <img src="./assert/redstone.webp" alt="Redstone Logo" width="300" />
 </p>
 
 Redstone is a custom scripting language inspired by Minecraft concepts. It reimagines common programming ideas using themed keywords while remaining a real, executable language with its own lexer, parser, AST, and runtime.
