@@ -1,0 +1,9 @@
+workbench add(x,y){
+    item result = x + y
+
+    result
+}
+
+item three = add(1,2)
+
+three

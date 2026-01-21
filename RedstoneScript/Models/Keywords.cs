@@ -12,7 +12,7 @@ public static class Keywords
         {"repeater", TokenType.While},
         {"hopper", TokenType.For},
         {"workbench", TokenType.Function},
-        //{"craft", TokenType.FunctionReturn},
+        {"craft", TokenType.Return},
         {"air", TokenType.Null},
         {"on", TokenType.True},
         {"off", TokenType.False},

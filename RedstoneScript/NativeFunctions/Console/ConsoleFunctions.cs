@@ -1,6 +1,10 @@
-namespace RedstoneScript.Interpreter;
+using RedstoneScript.Interpreter;
 
-public class NativeFunctions
+namespace RedstoneScript.NativeFunctions.Console;
+
+using System;
+
+public class ConsoleFunctions
 {
     public static RuntimeValue Print(List<RuntimeValue> arguments, Scope scope)
     {

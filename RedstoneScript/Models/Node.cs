@@ -115,6 +115,102 @@ public class VariableDelarationNode : StatementNode
 
 }
 
+public class FunctionDelarationNode : StatementNode
+{
+    public string Name { get; }
+
+    public List<string> Parameters { get; }
+
+    public BlockStatementNode Body { get; }
+
+    public FunctionDelarationNode(string name, List<string> parameters, BlockStatementNode body) : base(NodeType.FunctionDeclaration)
+    {
+        Name = name;
+        Parameters = parameters;
+        Body = body;
+    }
+
+    public override string ToString(int indent)
+    {
+        var sb = new StringBuilder();
+
+        // Function declaration header
+        sb.AppendLine($"{AstPrinter.Indent(indent)}FunctionDeclaration {Name}");
+
+        // Parameters
+        sb.AppendLine($"{AstPrinter.Indent(indent + 1)}Parameters:");
+        if (Parameters != null && Parameters.Count > 0)
+        {
+            foreach (var param in Parameters)
+            {
+                sb.AppendLine($"{AstPrinter.Indent(indent + 2)}{param}");
+            }
+        }
+        else
+        {
+            sb.AppendLine($"{AstPrinter.Indent(indent + 2)}(none)");
+        }
+
+        // Body
+        sb.AppendLine($"{AstPrinter.Indent(indent + 1)}Body:");
+        if (Body != null)
+        {
+            sb.AppendLine($"{AstPrinter.Indent(indent + 2)}(function body)");
+        }
+        else
+        {
+            sb.AppendLine($"{AstPrinter.Indent(indent + 2)}(empty)");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+}
+
+public class BlockStatementNode : StatementNode
+{
+    public List<INode> Statements { get; }
+
+    public BlockStatementNode(List<INode> statements)
+        : base(NodeType.BlockStatement)
+    {
+        Statements = statements;
+    }
+
+    public override string ToString(int indent)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"{AstPrinter.Indent(indent)}Block");
+
+        foreach (var stmt in Statements)
+        {
+            sb.AppendLine(stmt.ToString(indent + 1));
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+}
+
+public class ReturnStatementNode : StatementNode
+{
+    public ExpressionNode? Value { get; }
+
+    public ReturnStatementNode(ExpressionNode? value)
+        : base(NodeType.ReturnStatement)
+    {
+        Value = value;
+    }
+
+
+    public override string ToString(int indent)
+    {
+        return Value == null
+            ? $"{AstPrinter.Indent(indent)}Return"
+            : $"${AstPrinter.Indent(indent)}Return {Value}";
+    }
+}
+
+
 #endregion
 
 #region Expressions

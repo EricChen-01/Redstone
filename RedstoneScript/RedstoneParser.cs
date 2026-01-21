@@ -38,9 +38,64 @@ public class RedstoneParser
             case TokenType.Variable:
             case TokenType.Constant:
                 return ParseVariableDeclaration();
+            case TokenType.Function:
+                return ParseFunctionDeclaration();
             default:
                 return ParseExpression();
         }
+    }
+
+    private StatementNode ParseFunctionDeclaration()
+    {
+        Expect(TokenType.Function);
+
+        var name = Expect(TokenType.Identifier).Value;
+
+        var parameters = new List<string>();
+
+        Expect(TokenType.ParenthesisOpen);
+
+        while (!Check(TokenType.ParenthesisClose))
+        {
+            var paramToken = Expect(TokenType.Identifier);
+            parameters.Add(paramToken.Value);
+
+            // Comma separates parameters
+            if (!Match(TokenType.Comma))
+            {
+                break;   
+            }
+        }
+
+        Expect(TokenType.ParenthesisClose);
+
+        // Parse the body of the function
+        var body = ParseBlockStatement();
+
+        return new FunctionDelarationNode(name, parameters, body);
+    }
+
+    private BlockStatementNode ParseBlockStatement()
+    {
+        Expect(TokenType.BraceOpen);
+
+        var statements = new List<INode>();
+
+        // Allow empty lines at the start
+        SkipNewLines();
+
+        while (!Check(TokenType.BraceClose) && !IsAtEnd())
+        {
+            var stmt = ParseStatement();
+            statements.Add(stmt);
+
+            // Allow blank lines between statements
+            SkipNewLines();
+        }
+
+        Expect(TokenType.BraceClose);
+
+        return new BlockStatementNode(statements);
     }
 
     private StatementNode ParseVariableDeclaration()

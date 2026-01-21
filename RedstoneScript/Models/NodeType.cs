@@ -7,6 +7,9 @@ public enum NodeType
 
     // Statements
     VariableDeclaration,
+    FunctionDeclaration,
+    BlockStatement,
+    ReturnStatement,
 
 
     // Expressions

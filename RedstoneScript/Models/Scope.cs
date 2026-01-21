@@ -1,3 +1,6 @@
+using RedstoneScript.NativeFunctions.Console;
+using RedstoneScript.NativeFunctions.Math;
+
 namespace RedstoneScript.Interpreter;
 
 public sealed class Scope
@@ -19,7 +22,8 @@ public sealed class Scope
 
     private void AddNativeFunctions()
     {
-        Variables.Add("chat", new VariableEntry(new NativeFunctionValue(NativeFunctions.Print), true));
+        Variables.Add("chat", new VariableEntry(new NativeFunctionValue(ConsoleFunctions.Print), true));
+        Variables.Add("abs", new VariableEntry(new NativeFunctionValue(MathFunctions.AbsoluteValue), true));
     }
 
 #region helpers

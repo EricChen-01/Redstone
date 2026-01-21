@@ -108,9 +108,42 @@ public class NativeFunctionValue : RuntimeValue
         FunctionCall = function;
     }
 
+    public NativeFunctionValue(Func<RuntimeValue, Scope, RuntimeValue> function) 
+        : base(RuntimeValueType.NativeFunction)
+    {
+        // Wrap the single argument function into the list-based signature
+        FunctionCall = (args, scope) =>
+        {
+            if (args.Count != 1)
+                throw new Exception("This function expects exactly 1 argument");
+            return function(args[0], scope);
+        };
+    }
+
     public override string ToString()
     {
         return "<native function>";
     }
 }
 
+public class FunctionValue : RuntimeValue
+{
+    public string Name { get; }
+    public List<string> Parameters { get; }
+    public List<INode> Body { get; }
+    public Scope DeclarationScope { get; }
+
+    public FunctionValue(string name, List<string> parameters, List<INode> body, Scope scope) 
+        : base(RuntimeValueType.Function)
+    {
+        Name = name;
+        Parameters = parameters;
+        Body = body;
+        DeclarationScope = scope;
+    }
+
+    public override string ToString()
+    {
+        return "<function declaration>";
+    }
+}

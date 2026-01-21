@@ -1,5 +1,4 @@
 using RedstoneScript.AST;
-using RedstoneScript.Lexer;
 
 namespace RedstoneScript.Interpreter;
 
@@ -37,6 +36,7 @@ public class RedstoneInterpreter
             NodeType.ObjectLiteral => Evaluate<ObjectExpressionNode>(node, scope, EvaluateObjectExpression),
             NodeType.CallExpression => Evaluate<CallExpressionNode>(node, scope, EvaluateCallExpression),
             NodeType.MemberAccessExpression => Evaluate<MemberAccessExpression>(node, scope, EvaluateMemberAccessExpression),
+            NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
@@ -139,6 +139,19 @@ public class RedstoneInterpreter
         {
             return nativeFunction.FunctionCall(arguments, scope);
         }
+        else if (functionValue is FunctionValue function)
+        {
+            var functionScope = new Scope(function.DeclarationScope);
+            var parameters = function.Parameters;
+            for(int i = 0 ; i < parameters.Count; i++)
+            {
+                // TODO: ensure that each parameter has a matching arguments input.
+                var parameter = parameters[i];
+                functionScope.DefineVariable(parameter, arguments[i], false);
+            }
+            
+            return EvaluateBlockStatement(function.Body, functionScope);
+        }
 
         throw new NotImplementedException("Native function calls are only supported.");
     }
@@ -165,6 +178,36 @@ public class RedstoneInterpreter
             
         return value;
     }
+
+    private static RuntimeValue EvaluateFunctionDeclarationStatement(FunctionDelarationNode functionDelarationNode, Scope scope)
+    {
+        var name = functionDelarationNode.Name;
+        var parameters = functionDelarationNode.Parameters;
+        var body = functionDelarationNode.Body.Statements;
+
+        var newFunction = new FunctionValue(name, parameters, body, scope);
+        return scope.DefineVariable(name, newFunction, true);
+    }
+
+    private static RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
+    {
+        RuntimeValue result = new NullValue();
+        foreach (var statement in statements)
+        {
+            result = Evaluate(statement, scope);
+        }
+        return result;
+    }
+
+    // private static object EvaluateReturnStatement(ReturnStatementNode node, Scope scope)
+    // {
+    //     var value = node.Value == null
+    //         ? new NullValue()
+    //         : Evaluate(node.Value, scope);
+
+    //     return new ReturnSignal(value);
+    // }
+
 
 #region Helpers
     /// <summary>
