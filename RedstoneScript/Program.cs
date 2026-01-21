@@ -3,6 +3,11 @@ using RedstoneScript.Interpreter;
 using RedstoneScript.Lexer;
 using RedstoneScript.AST.Parser;
 
+
+// Bugs:
+// No negative numbers
+// No Comments
+
 static void ShowSplash()
 {
     Console.ForegroundColor = ConsoleColor.Red;

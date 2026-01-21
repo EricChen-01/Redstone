@@ -143,9 +143,13 @@ public class RedstoneInterpreter
         {
             var functionScope = new Scope(function.DeclarationScope);
             var parameters = function.Parameters;
+            if (parameters.Count > arguments.Count)
+            {
+                var missing = parameters.Skip(arguments.Count).ToList();
+                throw new InvalidOperationException($"Redstone Interpreter: Required arguments not passed. Missing {string.Join(",", missing)}");
+            }
             for(int i = 0 ; i < parameters.Count; i++)
             {
-                // TODO: ensure that each parameter has a matching arguments input.
                 var parameter = parameters[i];
                 functionScope.DefineVariable(parameter, arguments[i], false);
             }
@@ -153,7 +157,7 @@ public class RedstoneInterpreter
             return EvaluateBlockStatement(function.Body, functionScope);
         }
 
-        throw new NotImplementedException("Native function calls are only supported.");
+        throw new InvalidOperationException($"Redstone Interpreter: Could not determine function to run. got: {functionValue.Type}");
     }
 
     private static RuntimeValue EvaluateMemberAccessExpression(MemberAccessExpression memberAccessExpression, Scope scope)
