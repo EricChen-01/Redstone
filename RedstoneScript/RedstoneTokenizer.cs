@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RedstoneScript.Lexer;
@@ -10,12 +11,166 @@ public partial class RedstoneTokenizer
     public static List<Token> Tokenize(string sourceCode)
     {
         var tokens = new List<Token>();
-        var allLines = sourceCode.Split("\n", StringSplitOptions.RemoveEmptyEntries);
-        
-        foreach(string line in allLines)
+        int currentCharacterIndex = 0;
+
+        // parse until end of source code
+        while(currentCharacterIndex != sourceCode.Length)
         {
-            TokenizeLine(line, tokens);   
-            tokens.Add(new Token("\\n", TokenType.NewLine));
+            char character = sourceCode[currentCharacterIndex];
+
+            // handling cases
+            if (IsSkippableCharacter(character))
+            {
+                currentCharacterIndex++;
+                continue;
+            }
+
+            if (character == '\n')
+            {
+                tokens.Add(new Token("\\n", TokenType.NewLine));
+                currentCharacterIndex++;
+                continue;
+            }
+
+            switch (character)
+            {
+                case '(':
+                    tokens.Add(new Token("(", TokenType.ParenthesisOpen)); currentCharacterIndex++; continue;
+                case ')':
+                    tokens.Add(new Token(")", TokenType.ParenthesisClose)); currentCharacterIndex++; continue;
+                case '{':
+                    tokens.Add(new Token("{", TokenType.BraceOpen)); currentCharacterIndex++; continue;
+                case '}':
+                    tokens.Add(new Token("}", TokenType.BraceClose)); currentCharacterIndex++; continue;
+                case '[':
+                    tokens.Add(new Token("[", TokenType.BracketOpen)); currentCharacterIndex++;; continue;
+                case ']':
+                    tokens.Add(new Token("]", TokenType.BracketClose)); currentCharacterIndex++; continue;
+                case '.':
+                    tokens.Add(new Token(".", TokenType.Dot)); currentCharacterIndex++; continue;
+                case ':':
+                    tokens.Add(new Token(":", TokenType.Colon)); currentCharacterIndex++; continue;
+                case ',':
+                    tokens.Add(new Token(",", TokenType.Comma)); currentCharacterIndex++; continue;
+                case '=':
+                    tokens.Add(new Token("=", TokenType.Equals)); currentCharacterIndex++; continue;
+            }
+
+            // handles math operators
+            if ("+-*/%".Contains(character))
+            {
+                tokens.Add(new Token(character.ToString(), TokenType.Operator));
+                currentCharacterIndex++;
+                continue;
+            }
+
+            // handles numbers
+            if (char.IsDigit(character))
+            {
+                int start = currentCharacterIndex;
+
+                while (
+                    (currentCharacterIndex < sourceCode.Length) && 
+                    (char.IsDigit(sourceCode[currentCharacterIndex]) ||
+                    sourceCode[currentCharacterIndex] == '.'))
+                {
+                    currentCharacterIndex++;
+                }
+
+                var number = sourceCode[start..currentCharacterIndex];
+                if (!IsValidNumber(number))
+                {
+                    throw new InvalidOperationException("Redstone Token Parser: Invalid Syntax");
+                }
+                tokens.Add(new Token(number, TokenType.Number));
+                continue;
+            }
+
+            // handles identifiers and keywords
+            if (char.IsLetter(character) || character == '_')
+            {
+                int start = currentCharacterIndex;
+
+                while (currentCharacterIndex < sourceCode.Length && 
+                    (char.IsLetterOrDigit(sourceCode[currentCharacterIndex]) || sourceCode[currentCharacterIndex] == '_'))
+                {
+                    currentCharacterIndex++;
+                }
+                var text = sourceCode.Substring(start, currentCharacterIndex - start);
+
+                if (IsIdentifer(text) && Keywords.TryGetKeyword(text, out var keywordType))
+                {
+                    tokens.Add(new Token(text, keywordType));   
+                }
+                else if (IsIdentifer(text))
+                {
+                    tokens.Add(new Token(text, TokenType.Identifier));                    
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Redstone Token Parser: Invalid Syntax. {text} cannot be an identifier.");
+                }
+                continue;
+            }
+
+            // handle strings
+            var isValidString = false;
+            if (character == '"')
+            {
+                var sb = new StringBuilder();
+                var start = currentCharacterIndex;
+                currentCharacterIndex++; // move past the "
+
+                while (currentCharacterIndex < sourceCode.Length)
+                {
+                    char c = sourceCode[currentCharacterIndex];
+                    
+                    // handle closing quote
+                    if (c == '"')
+                    {
+                        currentCharacterIndex++; // consume closing "
+                        tokens.Add(new Token(sb.ToString(), TokenType.String));
+                        isValidString = true;
+                        break;
+                    }
+
+                    // handles literal back slash '\'
+                    if (c == '\\')
+                    {
+                        currentCharacterIndex++;
+                        if (currentCharacterIndex >= sourceCode.Length)
+                        {
+                            throw new InvalidOperationException($"Redstone Token Parser: Unterminated string at end of file.");   
+                        }
+
+                        char escape = sourceCode[currentCharacterIndex];
+                        sb.Append(escape switch
+                        {
+                            'n' => '\n',
+                            't' => '\t',
+                            '"' => '"',
+                            '\\' => '\\',
+                            _ => throw new Exception($"Invalid escape \\{escape}")
+                        });
+                    }
+                    else
+                    {
+                        sb.Append(c);
+                    }
+
+                    currentCharacterIndex++;
+                }
+                
+                if (!isValidString)
+                {
+                    throw new Exception($"Redstone Token Parser: Unterminated string literal detected at {start}.");
+                }
+
+                continue;
+            }
+
+            // error handling
+            throw new Exception($"Redstone Token Parser: Unexpected character '{character}' at position {currentCharacterIndex}.");
         }
         
         // end of file token
@@ -23,106 +178,15 @@ public partial class RedstoneTokenizer
 
         return tokens;
     }
-
-    private static void TokenizeLine(string line, List<Token> tokens)
+    
+    private static bool IsSkippableCharacter(char c)
     {
-        // we want to split by all " " because our language will be space sensitive for now
-        var all = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-
-        foreach(string input in all)
+        if (c == ' ' || c == '\t' || c == '\r')
         {
-            if (input == "(")
-            {
-                tokens.Add(new Token(input, TokenType.ParenthesisOpen));
-                continue;
-            }
-            else if (input == ")")
-            {
-                tokens.Add(new Token(input, TokenType.ParenthesisClose));
-                continue;
-            }
+            return true;
+        }
 
-            else if (input == "[")
-            {
-                tokens.Add(new Token(input, TokenType.BracketOpen));
-                continue;
-            }
-            else if (input == "]")
-            {
-                tokens.Add(new Token(input, TokenType.BracketClose));
-                continue;
-            }
-
-            else if (input == "{")
-            {
-                tokens.Add(new Token(input, TokenType.BraceOpen));
-                continue;
-            }
-            else if (input == "}")
-            {
-                tokens.Add(new Token(input, TokenType.BraceClose));
-                continue;
-            }
-
-            else if (input == ".")
-            {
-                tokens.Add(new Token(".", TokenType.Dot));
-                continue;
-            }
-
-            else if (input == ":")
-            {
-                tokens.Add(new Token(input, TokenType.Colon));
-                continue;
-            }
-
-            else if (input == ",")
-            {
-                tokens.Add(new Token(input, TokenType.Comma));
-                continue;
-            }
-
-            // math operators
-            else if (input is "+" or "-" or "*" or "/" or "%")
-            {
-                tokens.Add(new Token(input, TokenType.Operator));
-                continue;
-            }
-
-            else if (input == "=")
-            {
-                tokens.Add(new Token(input, TokenType.Equals));
-                continue;
-            }
-
-            // keywords like item, repeater, etc
-            else if (Keywords.TryGetKeyword(input, out var keywordType))
-            {
-                tokens.Add(new Token(input, keywordType));
-                continue;
-            }
-
-            // number
-            else if (double.TryParse(input, out _))
-            {
-                tokens.Add(new Token(input, TokenType.Number));
-                continue;
-            }
-
-            // identifier
-            else if (IsIdentifer(input))
-            {
-                tokens.Add(new Token(input, TokenType.Identifier));
-            }
-            
-            // error handling
-            else
-            {
-                Console.WriteLine("Unrecognized input in source: {0}", input);
-                throw new InvalidOperationException("Redstone Token Parser: Invalid Syntax");
-            }
-        }   
-
+        return false;
     }
 
     private static bool IsIdentifer(string input)
@@ -133,4 +197,13 @@ public partial class RedstoneTokenizer
 
     [GeneratedRegex(@"^[A-Za-z0-9]*[A-Za-z][A-Za-z0-9]*$")]
     private static partial Regex isIdentiferRegex();
+
+    private static bool IsValidNumber(string input)
+    {
+        return isValidNumberRegex().IsMatch(input);
+    }
+
+    [GeneratedRegex(@"^(0|[1-9][0-9]*)(\.[0-9]+)?$")]
+    private static partial Regex isValidNumberRegex();
+
 }

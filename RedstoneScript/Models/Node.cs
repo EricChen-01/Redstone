@@ -161,6 +161,22 @@ public class NumericExpressionNode : ExpressionNode
 
 }
 
+public class StringExpressionNode : ExpressionNode
+{
+    public string Value { get; }
+
+    public StringExpressionNode(string value) : base(NodeType.StringLiteral)
+    {
+        Value = value;
+    }
+
+    public override string ToString(int indent)
+    {
+        return $"{AstPrinter.Indent(indent)}String({Value})";
+    }
+
+}
+
 public class IdentifierExpressionNode : ExpressionNode
 {
     public string Name { get; } 
@@ -294,10 +310,10 @@ public class MemberAccessExpression : ExpressionNode
     {
         return
     $@"{AstPrinter.Indent(indent)}MemberAccess
-{AstPrinter.Indent(indent + 1)}Object:
-{AstPrinter.Indent(indent + 2)}{Object}
-{AstPrinter.Indent(indent + 1)}Property:
-{AstPrinter.Indent(indent + 2)}{Property}";
+        {AstPrinter.Indent(indent + 1)}Object:
+        {AstPrinter.Indent(indent + 2)}{Object}
+        {AstPrinter.Indent(indent + 1)}Property:
+        {AstPrinter.Indent(indent + 2)}{Property}";
     }
 
 
@@ -324,7 +340,7 @@ public class CallExpressionNode : ExpressionNode
 
         if (Arguments.Count > 0)
         {
-            sb.AppendLine($"{AstPrinter.Indent(indent)}Arguments:");
+            sb.AppendLine($"{AstPrinter.Indent(indent + 1)}Arguments:");
             foreach (var arg in Arguments)
             {
                 sb.AppendLine($"{AstPrinter.Indent(indent + 2)}{arg}");

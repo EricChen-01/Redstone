@@ -46,6 +46,20 @@ public class NumberValue : RuntimeValue
     }
 }
 
+public class StringValue : RuntimeValue
+{
+    public string Value { get; }
+    public StringValue(string value) : base(RuntimeValueType.String)
+    {
+        Value = value;
+    }
+
+    public override string ToString()
+    {
+        return Value;
+    }
+}
+
 public class BooleanValue : RuntimeValue
 {
     bool Value { get; }

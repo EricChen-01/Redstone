@@ -21,9 +21,7 @@ public class RedstoneParser
         while (!IsAtEnd())
         {            
             statements.Add(ParseStatement());
-
-            IgnoreNewLine();
-            // if (IsAtEnd()) break; // stop at EOF
+            SkipNewLines();
         }
 
         return new ProgramNode(statements);
@@ -77,7 +75,7 @@ public class RedstoneParser
         {
             Expect(TokenType.Equals);
             var expression = ParseExpression();
-            Expect(TokenType.NewLine);   
+            Match(TokenType.NewLine, TokenType.EOF);   
             return new VariableDelarationNode(identifierName, expression, isConstant); 
         }else if(Current().Type == TokenType.NewLine)
         {
@@ -226,6 +224,8 @@ public class RedstoneParser
             case TokenType.False:
                 Advance();
                 return new BooleanExpressionNode(false);
+            case TokenType.String:
+                return new StringExpressionNode(Advance().Value);
             default:
                 throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
@@ -342,13 +342,11 @@ public class RedstoneParser
     private Token Current() => tokens[currentTokenIndex];
 
     private bool IsToken(TokenType tokenType, string value) => (Current().Type == tokenType) && (Current().Value == value); 
-
-    private void IgnoreNewLine()
+    
+    private void SkipNewLines()
     {
-        while(Current().Type == TokenType.NewLine)
-        {
+        while (Check(TokenType.NewLine))
             Advance();
-        }
     }
 
     private Token Expect(TokenType type, string? errorMessage = null)

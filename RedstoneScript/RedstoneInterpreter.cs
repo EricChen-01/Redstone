@@ -28,6 +28,7 @@ public class RedstoneInterpreter
             NodeType.Program => Evaluate<ProgramNode>(node, scope, EvaluateProgram),
             NodeType.Identifier => Evaluate<IdentifierExpressionNode>(node, scope, EvaluateIdentifierExpression),
             NodeType.NumericLiteral => Evaluate(node, (NumericExpressionNode node) => new NumberValue(node.Value)),
+            NodeType.StringLiteral => Evaluate(node, (StringExpressionNode node) => new StringValue(node.Value)),
             NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, scope, EvaluateBinaryExpression),
             NodeType.NullLiteral => new NullValue(),
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
@@ -35,7 +36,8 @@ public class RedstoneInterpreter
             NodeType.AssignmentExpression => Evaluate<AssignmentExpressionNode>(node, scope, EvaluateAssignmentExpression),
             NodeType.ObjectLiteral => Evaluate<ObjectExpressionNode>(node, scope, EvaluateObjectExpression),
             NodeType.CallExpression => Evaluate<CallExpressionNode>(node, scope, EvaluateCallExpression),
-            _ => throw new InvalidOperationException($"RedStone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n\t{node}"),
+            NodeType.MemberAccessExpression => Evaluate<MemberAccessExpression>(node, scope, EvaluateMemberAccessExpression),
+            _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
  
@@ -141,6 +143,30 @@ public class RedstoneInterpreter
         throw new NotImplementedException("Native function calls are only supported.");
     }
 
+    private static RuntimeValue EvaluateMemberAccessExpression(MemberAccessExpression memberAccessExpression, Scope scope)
+    {
+        var objectValue = Evaluate(memberAccessExpression.Object, scope); // evaluate the memberAccessExpression first.
+        if (objectValue is not ObjectValue evaluatedObject)
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: Cannot access property of non-object. Got: {objectValue}");
+        }
+
+        // property must be an identifier
+        if (memberAccessExpression.Property is not IdentifierExpressionNode identifierExpressionNode)
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: Member access property must be an identifier");
+        }
+
+        // look up the property in the object
+        if (!evaluatedObject.Properties.TryGetValue(identifierExpressionNode.Name, out var value))
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: Property '{identifierExpressionNode.Name}' does not exist on object");
+        }
+            
+        return value;
+    }
+
+#region Helpers
     /// <summary>
     /// Evaluate with a scope
     /// </summary>
@@ -173,4 +199,5 @@ public class RedstoneInterpreter
         throw new InvalidOperationException($"Redstone Interpreter: Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
+#endregion
 }

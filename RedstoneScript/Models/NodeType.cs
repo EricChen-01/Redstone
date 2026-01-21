@@ -13,6 +13,7 @@ public enum NodeType
     NumericLiteral,
     NullLiteral,
     BooleanLiteral,
+    StringLiteral,
 
     Identifier,
 
