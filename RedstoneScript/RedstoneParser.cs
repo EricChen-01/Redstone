@@ -116,9 +116,9 @@ public class RedstoneParser
         // const varName
         if (isConstant)
         {
-            Expect(TokenType.Equals, "Expected an equal sign to the right of the variable.");
+            Expect(TokenType.Equals, "Redstone Node Parser: Expected an equal sign to the right of the variable.");
             var expression = ParseExpression();
-            Expect(TokenType.NewLine, "Expected a new line character.");
+            Match(TokenType.NewLine, TokenType.EOF);
             return new VariableDelarationNode(identifierName, expression, true);
         }
 

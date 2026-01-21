@@ -23,7 +23,7 @@ public sealed class Scope
     private void AddNativeFunctions()
     {
         Variables.Add("chat", new VariableEntry(new NativeFunctionValue(ConsoleFunctions.Print), true));
-        Variables.Add("abs", new VariableEntry(new NativeFunctionValue(MathFunctions.AbsoluteValue), true));
+        MathFunctions.ImportMath(this);
     }
 
 #region helpers
