@@ -6,4 +6,4 @@ workbench add(x,y){
 
 item three = add(1,2)
 
-three
+chat(three)

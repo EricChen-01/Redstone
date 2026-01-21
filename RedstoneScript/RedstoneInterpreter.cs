@@ -17,6 +17,34 @@ public class RedstoneInterpreter
         return lastRuntimeValue;
     }
 
+    public static bool ValidateProgram(ProgramNode programNode)
+    {
+        for (int i = 0; i < programNode.Nodes.Count; i++)
+        {
+            var node = programNode.Nodes[i];
+
+            switch (node)
+            {
+                case VariableDelarationNode:
+                case FunctionDelarationNode:
+                case CallExpressionNode:
+                    break;
+                case ExpressionNode:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Redstone Validation error: standalone expression not allowed at top level (statement {i + 1})");
+                    Console.ResetColor();
+                    return false;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Validation error: unknown node type at statement {i + 1}");
+                    Console.ResetColor();
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Evaluates the current Node given the current scope.
     /// </summary>

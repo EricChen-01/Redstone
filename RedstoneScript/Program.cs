@@ -67,81 +67,130 @@ static string? GetFile(string input)
     return source;
 }
 
-ShowSplash();
-
 Scope globalScope = new Scope();
 bool showAst = false;
-
-while (true)
+void RunProgram(string filePath)
 {
-    Console.ForegroundColor = ConsoleColor.DarkGray;
-    Console.Write("[");
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.Write("Redstone");
-    Console.ForegroundColor = ConsoleColor.DarkGray;
-    Console.Write("] ");
-    Console.ResetColor();
-
-    Console.Write(">>> ");
-    var input = Console.ReadLine();
-
-    if (string.IsNullOrWhiteSpace(input))
-        continue;
-
-    if (input.Trim().ToLower() == "exit")
-        break;
-
-    if (input.Trim() == "clear" || input.Trim() == "cls")
+    var sourceCodePath = filePath;
+    string sourceCode = string.Empty;
+    if (File.Exists(sourceCodePath))
     {
-        Console.Clear();
-        continue;
+        try
+        {
+            sourceCode = File.ReadAllText(sourceCodePath);
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error reading file {sourceCodePath}: {ex.Message}");
+            Console.ResetColor();
+        }
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"File not found: {sourceCodePath}");
+        Console.ResetColor();
     }
 
-    if (input.Trim() == "debug")
+    var tokens = RedstoneTokenizer.Tokenize(sourceCode);
+    var parser = new RedstoneParser(tokens);
+    var ast = parser.ParseRoot();
+
+    if (!RedstoneInterpreter.ValidateProgram(ast))
     {
-        showAst = true;
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("Debug on.");
-        Console.ResetColor();
-        continue;
+        return;
     }
     
-    try
+    RedstoneInterpreter.EvaluateProgram(ast, globalScope);
+}
+
+void RunRepl()
+{
+    ShowSplash();
+    while (true)
     {
-        if (input.TrimStart().StartsWith("run"))
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.Write("[");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write("Redstone");
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.Write("] ");
+        Console.ResetColor();
+
+        Console.Write(">>> ");
+        var input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+            continue;
+
+        if (input.Trim().ToLower() == "exit")
+            break;
+
+        if (input.Trim() == "clear" || input.Trim() == "cls")
         {
-            input = GetFile(input);
-            if (input == null)
-            {
-                continue;
-            }
+            Console.Clear();
+            continue;
         }
 
-        var tokens = RedstoneTokenizer.Tokenize(input);
-        var parser = new RedstoneParser(tokens);
-        var ast = parser.ParseRoot();
-
-        if (showAst)
+        if (input.Trim() == "debug")
         {
+            showAst = true;
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(ast);
+            Console.WriteLine("Debug on.");
+            Console.ResetColor();
+            continue;
+        }
+        
+        try
+        {
+            if (input.TrimStart().StartsWith("run"))
+            {
+                input = GetFile(input);
+                if (input == null)
+                {
+                    continue;
+                }
+            }
+
+            var tokens = RedstoneTokenizer.Tokenize(input);
+            var parser = new RedstoneParser(tokens);
+            var ast = parser.ParseRoot();
+
+            if (showAst)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(ast);
+                Console.ResetColor();
+            }
+
+            var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine(result);   
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error: {ex.Message}");
             Console.ResetColor();
         }
 
-        var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-
-        Console.WriteLine(result);   
-        Console.ResetColor();
+        Console.WriteLine();
     }
-    catch (Exception ex)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"Error: {ex.Message}");
-        Console.ResetColor();
-    }
-
-    Console.WriteLine();
+    
 }
 
+if (args.Length > 0)
+{
+    // Program input mode
+    var filePath = args[0];
+    RunProgram(filePath);
+}
+else
+{
+    // REPL mode
+    RunRepl();
+}

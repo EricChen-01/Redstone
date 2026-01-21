@@ -3,4 +3,5 @@ item p = {
     y:20
 }
 
-chat( p )
+chat("p.x is ", p.x)
+chat("p.y is ", p.y)

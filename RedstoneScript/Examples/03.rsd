@@ -11,4 +11,7 @@ item point2 = {
 item dx = point2.x - point1.x
 item dy = point2.y - point1.y
 item distance = dx + dy
-distance
+
+chat("Point1: ", point1)
+chat("Point2: ", point2)
+chat("Manhattan Distance is: ", distance)

@@ -86,8 +86,32 @@ This will compile the Redstone interpreter and all supporting projects.
 
 ### Running a Redstone Script
 
+#### Program Mode
+
 ```
-dotnet run
+dotnet run -- <path to your .rsd file>
+```
+
+Example Redstone script:
+```
+bedrock PI = 3.141592653589793
+
+item radius = 5
+
+workbench calcCircumference(r) {
+    item result = 2 * PI * r
+    chat(result)
+}
+
+chat("The circumferene of a circle with radius ", radius, "is:")
+calcCircumference(radius)
+```
+
+>!!! Remember that in program mode, stand alone statements like `1+2` are not allowed. 
+
+#### Interactive Mode
+```
+dotnet run 
 ```
 
 Then run the script:
@@ -104,7 +128,8 @@ workbench add(a, b) {
   a + b
 }
 
-add(2, 3)
+chat(add(2, 3))
+// returns 5
 ```
 
 ---
