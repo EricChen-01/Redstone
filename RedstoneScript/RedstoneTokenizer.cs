@@ -55,6 +55,14 @@ public partial class RedstoneTokenizer
                         tokens.Add(new Token(">=",TokenType.Operator));
                         currentCharacterIndex += 2;
                         continue;
+                    case "<":
+                        tokens.Add(new Token("<",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
+                    case ">":
+                        tokens.Add(new Token(">",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
                 }
             }
 
