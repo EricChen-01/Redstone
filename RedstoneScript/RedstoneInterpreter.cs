@@ -79,15 +79,96 @@ public class RedstoneInterpreter
         var left = Evaluate(binaryExpressionNode.Left, scope);
         var right = Evaluate(binaryExpressionNode.Right, scope);
 
-        if (left is NumberValue l && right is NumberValue r)
+        if (left is NumberValue l && right is NumberValue r && "+-*/%".Contains(binaryExpressionNode.Operator))
         {
             return EvaluateNumericExpression(l, r, binaryExpressionNode.Operator);
+        }
+
+        switch (binaryExpressionNode.Operator)
+        {
+            // Comparison
+            case "==":
+                return EvaluateEqualComparisonExpression(left, right);
+            case "!=":
+                return EvaluateNotEqualComparisonExpression(left, right);
+            case "<":
+                return EvaluateLessThanComparisonExpression(left, right);
+            case "<=":
+                return EvaluateLessThanEqualComparisonExpression(left, right);
+            case ">":
+                return EvaluateGreaterThanComparisonExpression(left,right);
+            case ">=":
+                return EvaluateGreaterThanEqualComparisonExpression(left, right);
         }
 
         throw new NotSupportedException(
             $"Operator '{binaryExpressionNode.Operator}' not supported for types " +
             $"{left.GetType().Name} and {right.GetType().Name}"
         );
+    }
+
+    private static BooleanValue EvaluateEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue lNum && right is NumberValue rNum)
+        {
+            return new BooleanValue(lNum.Value == rNum.Value);   
+        }
+        if (left is BooleanValue lBool && right is BooleanValue rBool)
+        {
+            return new BooleanValue(lBool.Value == rBool.Value);   
+        }
+        if (left is StringValue lStr && right is StringValue rStr)
+        {
+            return new BooleanValue(lStr.Value == rStr.Value);   
+        }
+        
+        return new BooleanValue(false);
+    }
+
+    private static BooleanValue EvaluateNotEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue lNum && right is NumberValue rNum)
+        {
+            return new BooleanValue(lNum.Value != rNum.Value);   
+        }
+        if (left is BooleanValue lBool && right is BooleanValue rBool)
+        {
+            return new BooleanValue(lBool.Value != rBool.Value);   
+        }
+        if (left is StringValue lStr && right is StringValue rStr)
+        {
+            return new BooleanValue(lStr.Value != rStr.Value);   
+        }
+        
+        return new BooleanValue(true);
+    }
+
+    private static BooleanValue EvaluateLessThanComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue l && right is NumberValue r)
+            return new BooleanValue(l.Value < r.Value);
+        throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} < {right.Type}");
+    }
+
+    private static BooleanValue EvaluateLessThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue l && right is NumberValue r)
+            return new BooleanValue(l.Value <= r.Value);
+        throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} <= {right.Type}");
+    }
+
+    private static BooleanValue EvaluateGreaterThanComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue l && right is NumberValue r)
+            return new BooleanValue(l.Value > r.Value);
+        throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} > {right.Type}");
+    }
+
+    private static BooleanValue EvaluateGreaterThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    {
+        if (left is NumberValue l && right is NumberValue r)
+            return new BooleanValue(l.Value >= r.Value);
+        throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} >= {right.Type}");
     }
 
     private static NumberValue EvaluateNumericExpression(NumberValue left, NumberValue right, string operatorSign)

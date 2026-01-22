@@ -2,6 +2,7 @@ using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
 
+
 public class RedstoneParser
 {
     private List<Token> tokens = new();
@@ -151,6 +152,27 @@ public class RedstoneParser
         return ParseAssignmentExpression();
     }
 
+    private ExpressionNode ParseComparisionExpression()
+    {
+        var left = ParseAdditiveExpression();
+
+        while(
+            IsToken(TokenType.Operator, OperatorType.EQUALS) ||
+            IsToken(TokenType.Operator, OperatorType.NOTEQUAL) || 
+            IsToken(TokenType.Operator, OperatorType.GREATERTHAN) ||
+            IsToken(TokenType.Operator, OperatorType.GREATERTHANEQUALTO) ||
+            IsToken(TokenType.Operator, OperatorType.LESSTHAN) ||
+            IsToken(TokenType.Operator, OperatorType.LESSTHANEQUALTO))
+        {
+            var operation = Advance().Value;
+            var right = ParseAdditiveExpression();
+            left = new BinaryExpressionNode(left, right, operation);
+        }
+
+
+        return left;
+    }
+
     private ExpressionNode ParseMultiplicitiveExpression()
     {
         var left = ParseMemberCallExpression();
@@ -187,10 +209,15 @@ public class RedstoneParser
 
     private ExpressionNode ParseAssignmentExpression()
     {
-        var left = ParseObjectExpression();
+        var left = ParseComparisionExpression();
 
         if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
         {
+            if (!IsValidAssignmentTarget(left))
+            {
+                throw new InvalidOperationException("Invalid assignment target");   
+            }
+
             var right = ParseAssignmentExpression();
             return new AssignmentExpressionNode(left, right);
         }
@@ -200,10 +227,7 @@ public class RedstoneParser
 
     private ExpressionNode ParseObjectExpression()
     {
-        if (!Match(TokenType.BraceOpen)) // if not a { then proceed to do expressions.
-        {
-            return ParseAdditiveExpression();
-        }
+        Expect(TokenType.BraceOpen);
 
         // if we're here then we have just advanced past the {
         var properties = new List<PropertyExpressionNode>();
@@ -281,6 +305,8 @@ public class RedstoneParser
                 return new BooleanExpressionNode(false);
             case TokenType.String:
                 return new StringExpressionNode(Advance().Value);
+            case TokenType.BraceOpen:
+                return ParseObjectExpression();
             default:
                 throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
         }
@@ -402,6 +428,12 @@ public class RedstoneParser
     {
         while (Check(TokenType.NewLine))
             Advance();
+    }
+
+    private bool IsValidAssignmentTarget(ExpressionNode node)
+    {
+        return node is IdentifierExpressionNode
+            || node is MemberAccessExpression;
     }
 
     private Token Expect(TokenType type, string? errorMessage = null)

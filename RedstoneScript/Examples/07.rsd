@@ -1,0 +1,59 @@
+item a = 5
+item b = 10
+chat("a is: ", a)
+chat("b is: ", b)
+
+chat("a == b: ", a == b)
+chat("a != b: ", a != b)
+chat("a < b: ", a < b)
+chat("a <= b: ", a <= b)
+chat("a > b: ", a > b)
+chat("a >= b: ", a >= b)
+
+item x = on
+item y = off
+chat("x is: ", x)
+chat("y is: ", y)
+
+chat("x == y: ", x == y)
+chat("x != y: ", x != y)
+chat("x == on: ", x == on)
+chat("y != on: ", y != on)
+
+item s1 = "hello"
+item s2 = "world"
+item s3 = "hello"
+chat("s1 is: ", s1)
+chat("s2 is: ", s2)
+chat("s3 is: ", s3)
+
+chat("s1 == s2: ", s1 == s2)
+chat("s1 != s2: ", s1 != s2)
+chat("s1 == s3: ", s1 == s3)
+chat("s1 != s3: ", s1 != s3)
+
+item num = 5
+item bool = on
+item str = "5"
+chat("num is: ", num)
+chat("bool is: ", bool)
+chat("str is: ", str)
+
+chat("num == bool: ", num == bool)
+chat("num != str: ", num != str)
+chat("bool != str: ", bool != str)
+
+item c = 10
+chat("c is: ", c)
+
+chat("a + b == c: ", (a + b) == c)
+
+item zero = 0
+item falseVal = off
+chat("zero is: ", zero)
+chat("falseVal is: ", falseVal)
+
+chat("zero == falseVal: ", zero == falseVal)
+chat("zero != falseVal: ", zero != falseVal)
+chat("\"true\" != on: ", "true" != on)
+chat("\"0\" == 0: ", "0" == 0)

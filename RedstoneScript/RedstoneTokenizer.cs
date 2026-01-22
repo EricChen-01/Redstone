@@ -36,7 +36,7 @@ public partial class RedstoneTokenizer
             if ("=!<>".Contains(character))
             {
                 char? next = (currentCharacterIndex + 1 < sourceCode.Length) ? sourceCode[currentCharacterIndex + 1] : null;
-                string combined = next != null ? $"{character}{next}" : character.ToString();
+                string combined = (next != null && !char.IsWhiteSpace(next.Value)) ? $"{character}{next}" : character.ToString();
                 switch (combined)
                 {
                     case "==":
