@@ -32,6 +32,32 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
+            // handles boolean operators like ==, !=, <, <=, >, >=
+            if ("=!<>".Contains(character))
+            {
+                char? next = (currentCharacterIndex + 1 < sourceCode.Length) ? sourceCode[currentCharacterIndex + 1] : null;
+                string combined = next != null ? $"{character}{next}" : character.ToString();
+                switch (combined)
+                {
+                    case "==":
+                        tokens.Add(new Token("==",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
+                    case "!=":
+                        tokens.Add(new Token("!=",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
+                    case "<=":
+                        tokens.Add(new Token("<=",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
+                    case ">=":
+                        tokens.Add(new Token(">=",TokenType.Operator));
+                        currentCharacterIndex += 2;
+                        continue;
+                }
+            }
+
             switch (character)
             {
                 case '(':
