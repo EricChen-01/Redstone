@@ -62,7 +62,7 @@ public class StringValue : RuntimeValue
 
 public class BooleanValue : RuntimeValue
 {
-    bool Value { get; }
+    public bool Value { get; }
     public BooleanValue(bool value) : base(RuntimeValueType.Boolean)
     {
         Value = value;
