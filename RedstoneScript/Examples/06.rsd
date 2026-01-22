@@ -7,5 +7,5 @@ workbench calcCircumference(r) {
     chat(result)
 }
 
-chat("The circumferene of a circle with radius ", radius, "is:")
+chat("The circumferene of a circle with radius ", radius, " is:")
 calcCircumference(radius)
