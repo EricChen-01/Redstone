@@ -164,5 +164,6 @@ Planned improvements include:
 * For loops
 * While loops
 * Expanded native function library
+* Unary Operators 
 
 ---
