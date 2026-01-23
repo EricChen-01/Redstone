@@ -13,6 +13,6 @@ public class ConsoleFunctions
             Console.Write(arg.ToString() + "");
         }
         Console.WriteLine();
-        return new NullValue();
+        return new VoidValue();
     }
 }
