@@ -1,0 +1,9 @@
+item x = 3
+item y = 7
+
+comparator(x < y) {
+    chat("x < y")
+    comparator(y == 7) {
+        chat("y is 7")
+    }
+}

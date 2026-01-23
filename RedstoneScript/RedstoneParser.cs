@@ -39,7 +39,6 @@ public class RedstoneParser
     /// </summary>
     private INode ParseStatement()
     {
-        // fallback.
         switch (Current().Type)
         {
             case TokenType.Variable:
@@ -47,11 +46,15 @@ public class RedstoneParser
                 return ParseVariableDeclaration();
             case TokenType.Function:
                 return ParseFunctionDeclaration();
+            case TokenType.If:
+                return ParseIfStatement();
             default:
                 return ParseExpression();
         }
     }
+    
 
+#region Statements
     private StatementNode ParseFunctionDeclaration()
     {
         Expect(TokenType.Function);
@@ -149,6 +152,21 @@ public class RedstoneParser
         throw new NotImplementedException("Redstone Node Parser: Parsing variable declaration is not supported yet.");
     }
 
+    private StatementNode ParseIfStatement()
+    {
+        Expect(TokenType.If);
+
+        Expect(TokenType.ParenthesisOpen);
+        var condition = ParseExpression();
+        Expect(TokenType.ParenthesisClose);
+
+        var body = ParseBlockStatement();
+
+        return new IfStatementNode(condition, body);
+    }
+#endregion
+
+#region Expressions
     /// <summary>
     /// Parses an expression node category
     /// </summary>
@@ -383,7 +401,7 @@ public class RedstoneParser
 
         return arguments;
     }
-
+#endregion
 #region helpers
     private bool IsAtEnd() => Current().Type == TokenType.EOF;
 

@@ -2,6 +2,7 @@ namespace RedstoneScript.Interpreter;
 
 public enum RuntimeValueType
 {
+    Void,
     Null,
     Number,
     String,
@@ -9,4 +10,5 @@ public enum RuntimeValueType
     Object,
     NativeFunction,
     Function,
+    If
 }

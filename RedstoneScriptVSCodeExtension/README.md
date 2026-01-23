@@ -17,6 +17,7 @@ The Redstone extension currently focuses on core language support to make editin
   * `workbench` (function declaration)
   * `air` (`null`)
   * `on` / `off` (booleans)
+  * `comparator` (if statement)
 * Highlighting for numbers, booleans, and function calls
 * Basic structure support for `.rsd` files
 

@@ -120,7 +120,7 @@ namespace RedstoneScript.Test
         }
 
         [Fact]
-        public void WorkbenchFunctionCall_WorkCorrectly_10()
+        public void FunctionCall_WorkCorrectly_10()
         {
             var source = Load("10.rsd");
 
@@ -128,6 +128,49 @@ namespace RedstoneScript.Test
 
             Assert.Contains("3", output); // first argument
             Assert.Contains("4", output); // second argument
+        }
+
+        [Fact]
+        public void IfStatement_WorkCorrectly_11()
+        {
+            var source = Load("11.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("a is on", output);
+        }
+
+        [Fact]
+        public void IfStatement_NumericComparison_WorkCorrectly_12()
+        {
+            var source = Load("12.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("x is less than y", output);
+            Assert.Contains("x is 5", output);
+        }
+
+        [Fact]
+        public void IfStatement_NestedIfStatements_WorkCorrectly_13()
+        {
+            var source = Load("13.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("x < y", output);
+            Assert.Contains("y is 7", output);
+        }
+
+        [Fact]
+        public void IfStatement_ExpressionsWithConditions_WorkCorrectly_14()
+        {
+            var source = Load("14.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("a minus b is greater than 2", output);
+            Assert.Contains("a plus b equals 7", output);
         }
     
         private static string Load(string fileName)

@@ -1,0 +1,14 @@
+item x = 5
+item y = 10
+
+comparator(x < y) {
+    chat("x is less than y")
+}
+
+comparator(x > y) {
+    chat("x is greater than y")
+}
+
+comparator(x == 5) {
+    chat("x is 5")
+}

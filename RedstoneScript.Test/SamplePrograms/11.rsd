@@ -1,0 +1,10 @@
+item a = on
+item b = off
+
+comparator(a) {
+    chat("a is on")
+}
+
+comparator(b) {
+    chat("b is on")
+}

@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedstoneScript", "RedstoneScript.csproj", "{21B5B5C6-345F-91D2-240E-C05FB1D5E99D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21B5B5C6-345F-91D2-240E-C05FB1D5E99D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21B5B5C6-345F-91D2-240E-C05FB1D5E99D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21B5B5C6-345F-91D2-240E-C05FB1D5E99D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21B5B5C6-345F-91D2-240E-C05FB1D5E99D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3AAB6A9D-A218-4F3F-A2CF-88C911C87A4A}
+	EndGlobalSection
+EndGlobal

@@ -65,6 +65,7 @@ public class RedstoneInterpreter
             NodeType.CallExpression => Evaluate<CallExpressionNode>(node, scope, EvaluateCallExpression),
             NodeType.MemberAccessExpression => Evaluate<MemberAccessExpression>(node, scope, EvaluateMemberAccessExpression),
             NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
+            NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
@@ -304,12 +305,32 @@ public class RedstoneInterpreter
 
     private static RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
     {
-        RuntimeValue result = new NullValue();
         foreach (var statement in statements)
         {
-            result = Evaluate(statement, scope);
+            Evaluate(statement, scope);
         }
-        return result;
+        return new VoidValue();
+    }
+
+    private static RuntimeValue EvaluateIfStatement(IfStatementNode node, Scope scope)
+    {
+        var conditionValue = Evaluate(node.Condition, scope);
+
+        if (conditionValue is BooleanValue booleanValue)
+        {
+            if (booleanValue.Value)
+            {
+                var ifStatementBody = node.Body.Statements;
+                var ifSatementScope = new Scope(scope);
+                EvaluateBlockStatement(ifStatementBody, ifSatementScope);   
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: If statement expected a boolean value, but got {conditionValue.Type}.\nNode: {node}");
+        }
+
+        return new VoidValue();
     }
 
     // private static object EvaluateReturnStatement(ReturnStatementNode node, Scope scope)
@@ -320,7 +341,6 @@ public class RedstoneInterpreter
 
     //     return new ReturnSignal(value);
     // }
-
 
 #region Helpers
     /// <summary>
@@ -353,6 +373,27 @@ public class RedstoneInterpreter
             return evaluator(typedNode);
 
         throw new InvalidOperationException($"Redstone Interpreter: Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
+        );
+    }
+
+    /// <summary>
+    /// Evaluate with scope and return nothing
+    /// </summary>
+    private static void Evaluate<TNode>(
+        INode node,
+        Scope scope,
+        Action<TNode, Scope> evaluator
+    )
+        where TNode : class, INode
+    {
+        if (node is TNode typedNode)
+        {
+            evaluator(typedNode, scope);
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Redstone Interpreter: Unexpected node type. Expected {typeof(TNode).Name}, got {node.GetType().Name}"
         );
     }
 #endregion

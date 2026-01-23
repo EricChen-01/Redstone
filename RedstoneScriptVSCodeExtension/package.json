@@ -2,7 +2,7 @@
   "name": "redstone",
   "displayName": "Redstone",
   "description": "Redstone scripting language",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.108.1"
   },

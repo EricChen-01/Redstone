@@ -10,7 +10,7 @@ public enum NodeType
     FunctionDeclaration,
     BlockStatement,
     ReturnStatement,
-
+    IfStatement,
 
     // Expressions
     NumericLiteral,

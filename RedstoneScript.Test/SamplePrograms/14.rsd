@@ -1,0 +1,10 @@
+item a = 5
+item b = 2
+
+comparator(a - b > 2) {
+    chat("a minus b is greater than 2")
+}
+
+comparator(a + b == 7) {
+    chat("a plus b equals 7")
+}
