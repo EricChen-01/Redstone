@@ -1,0 +1,5 @@
+item a = 1
+item b = 2
+a = b = 10
+chat(a)
+chat(b)

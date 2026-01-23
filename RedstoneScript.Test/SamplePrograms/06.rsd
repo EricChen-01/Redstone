@@ -1,0 +1,4 @@
+item a = on
+item b = off
+chat(a)
+chat(b)

@@ -1,0 +1,12 @@
+item a = 5
+item b = 10
+
+chat(a)
+chat(b)
+
+chat(a < b)
+chat(a > b)
+chat(a == b)
+chat(a != b)
+chat(a <= b)
+chat(b >= a)

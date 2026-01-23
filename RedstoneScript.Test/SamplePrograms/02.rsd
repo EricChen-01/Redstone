@@ -1,0 +1,10 @@
+
+
+
+
+item x = 3
+item y = 3
+
+chat("x is: ", x)
+chat("y is: ", y)
+chat("x == y: ", x == y)

@@ -1,0 +1,6 @@
+workbench add(a, b) {
+    chat(a)
+    chat(b)
+}
+
+add(3, 4)

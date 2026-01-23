@@ -1,0 +1,7 @@
+item obj = {
+    inner: {
+        value: 42
+    }
+}
+
+chat(obj.inner.value)

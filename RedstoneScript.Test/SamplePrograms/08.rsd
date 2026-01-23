@@ -1,0 +1,7 @@
+item obj = {
+    x: 10,
+    y: 20
+}
+
+chat(obj.x)
+chat(obj.y)

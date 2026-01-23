@@ -20,7 +20,13 @@ public class RedstoneParser
         var statements = new List<INode>();
 
         while (!IsAtEnd())
-        {            
+        {         
+            // Skip new lines if we start out with a new line.
+            if (Match(TokenType.NewLine))
+            {
+                continue;            
+            }
+  
             statements.Add(ParseStatement());
             SkipNewLines();
         }

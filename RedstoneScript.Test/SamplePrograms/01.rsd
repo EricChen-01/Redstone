@@ -1,0 +1,14 @@
+item a = 5
+item b = 10
+item c = 5
+
+chat("a is: ", a)
+chat("b is: ", b)
+chat("c is: ", c)
+
+chat("a == c: ", a == c)
+chat("a != b: ", a != b)
+chat("a < b: ", a < b)
+chat("b > a: ", b > a)
+chat("a <= c: ", a <= c)
+chat("b >= a: ", b >= a)
