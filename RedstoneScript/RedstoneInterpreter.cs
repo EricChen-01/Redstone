@@ -29,6 +29,7 @@ public class RedstoneInterpreter
                 case FunctionDelarationNode:
                 case CallExpressionNode:
                 case IfStatementNode:
+                case AssignmentExpressionNode:
                     break;
                 case ExpressionNode:
                     Console.ForegroundColor = ConsoleColor.Red;
