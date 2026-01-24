@@ -1,0 +1,7 @@
+item i = 0
+
+repeater (i < 3) {
+    i = i + 1
+}
+
+chat(i)

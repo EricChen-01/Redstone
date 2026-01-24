@@ -29,6 +29,7 @@ public class RedstoneInterpreter
                 case FunctionDelarationNode:
                 case CallExpressionNode:
                 case IfStatementNode:
+                case WhileSatementNode:
                 case AssignmentExpressionNode:
                     break;
                 case ExpressionNode:
@@ -68,6 +69,7 @@ public class RedstoneInterpreter
             NodeType.MemberAccessExpression => Evaluate<MemberAccessExpression>(node, scope, EvaluateMemberAccessExpression),
             NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
             NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
+            NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
@@ -330,6 +332,27 @@ public class RedstoneInterpreter
         else
         {
             throw new InvalidOperationException($"Redstone Interpreter: If statement expected a boolean value, but got {conditionValue.Type}.\nNode: {node}");
+        }
+
+        return new VoidValue();
+    }
+
+    private static RuntimeValue EvaluateWhileStatement(WhileSatementNode node, Scope scope)
+    {
+        var IsTruthy = () => {
+            var value = Evaluate(node.Condition, scope);
+            if (value is not BooleanValue b)
+            {
+                throw new InvalidOperationException($"Redstone Interpreter: While statement expected a boolean value, but got {value.Type}.\nNode: {node}");   
+            }
+            return b.Value;
+        };
+   
+        while (IsTruthy())
+        {
+            var whileStatementBody = node.Body.Statements;
+            var whileSatementScope = new Scope(scope);
+            EvaluateBlockStatement(whileStatementBody, whileSatementScope);
         }
 
         return new VoidValue();

@@ -1,0 +1,9 @@
+item flag = on
+item count = 0
+repeater (flag) {
+    count = count + 1
+    comparator (count >= 2) {
+        flag = off
+    }
+}
+chat(count)

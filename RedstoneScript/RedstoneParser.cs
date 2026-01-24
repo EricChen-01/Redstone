@@ -48,12 +48,13 @@ public class RedstoneParser
                 return ParseFunctionDeclaration();
             case TokenType.If:
                 return ParseIfStatement();
+            case TokenType.While:
+                return ParseWhileStatement();
             default:
                 return ParseExpression();
         }
     }
     
-
 #region Statements
     private StatementNode ParseFunctionDeclaration()
     {
@@ -163,6 +164,19 @@ public class RedstoneParser
         var body = ParseBlockStatement();
 
         return new IfStatementNode(condition, body);
+    }
+
+    private StatementNode ParseWhileStatement()
+    {
+        Expect(TokenType.While);
+
+        Expect(TokenType.ParenthesisOpen);
+        var condition = ParseExpression();
+        Expect(TokenType.ParenthesisClose);
+
+        var body = ParseBlockStatement();
+
+        return new WhileSatementNode(condition, body);
     }
 #endregion
 

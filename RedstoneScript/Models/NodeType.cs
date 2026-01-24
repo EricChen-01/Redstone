@@ -11,6 +11,7 @@ public enum NodeType
     BlockStatement,
     ReturnStatement,
     IfStatement,
+    WhileStatement,
 
     // Expressions
     NumericLiteral,

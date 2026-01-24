@@ -172,6 +172,26 @@ namespace RedstoneScript.Test
             Assert.Contains("a minus b is greater than 2", output);
             Assert.Contains("a plus b equals 7", output);
         }
+
+        [Fact]
+        public void WhileStatement_WorkCorrectly_15()
+        {
+            var source = Load("15.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("3", output);
+        }
+
+        [Fact]
+        public void WhileStatement_NestedIfStatement_WorkCorrectly_16()
+        {
+            var source = Load("16.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("2", output);
+        }
     
         private static string Load(string fileName)
         {
