@@ -1,12 +1,11 @@
-item score = 42
-item level = 1
+item score = 40
 
-comparator (score > 50) {
-    level = 5
+repeater (score < 50){
+    comparator(score == 45){
+        chat("SCORE IS 45!!")
+    } otherwise {
+        chat("score is ", score)
+    }
+
+    score = score + 1
 }
-
-comparator (score < 50) {
-    level = 2
-}
-
-chat(level)

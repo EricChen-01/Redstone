@@ -327,6 +327,14 @@ public class RedstoneInterpreter
                 var ifStatementBody = node.Body.Statements;
                 var ifSatementScope = new Scope(scope);
                 EvaluateBlockStatement(ifStatementBody, ifSatementScope);   
+            } else
+            {   
+                if (node.Else != null)
+                {
+                    var elseStatementBody = node.Else.Statements;
+                    var elseSatementScope = new Scope(scope);
+                    EvaluateBlockStatement(elseStatementBody, elseSatementScope);     
+                } 
             }
         }
         else

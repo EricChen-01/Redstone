@@ -155,13 +155,20 @@ public class RedstoneParser
 
     private StatementNode ParseIfStatement()
     {
+        // parses the if statement and body
         Expect(TokenType.If);
-
         Expect(TokenType.ParenthesisOpen);
         var condition = ParseExpression();
         Expect(TokenType.ParenthesisClose);
-
         var body = ParseBlockStatement();
+
+        // parse the else statement and body
+        SkipNewLines();
+        if (Match(TokenType.Else))
+        {
+            var elseBody = ParseBlockStatement();  
+            return new IfStatementNode(condition, body, elseBody); 
+        }
 
         return new IfStatementNode(condition, body, null);
     }
@@ -445,6 +452,11 @@ public class RedstoneParser
         return Current().Type == type;
     }
 
+    /// <summary>
+    /// Check if the next token is any of the types provided. Advances if a match occurs.
+    /// </summary>
+    /// <param name="types"></param>
+    /// <returns></returns>
     private bool Match(params TokenType[] types)
     {
         foreach (var type in types)

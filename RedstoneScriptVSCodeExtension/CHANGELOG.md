@@ -14,3 +14,11 @@
 - comparision support (==, !=, >, <, etc)
 - added new keywords to the list
 - booleans now have their own highlights.
+
+
+## [0.0.3] - 
+
+### Added
+
+- Added else keyword support
+- added while loop keyword support

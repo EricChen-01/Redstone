@@ -6,8 +6,6 @@ public class IfStatementNode : StatementNode
     public BlockStatementNode Body { get; }
     public BlockStatementNode? Else { get; }
 
-
-
     public IfStatementNode(ExpressionNode condition, BlockStatementNode body, BlockStatementNode? @else)
         : base(NodeType.IfStatement)
     {
