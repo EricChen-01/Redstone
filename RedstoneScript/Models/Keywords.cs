@@ -9,6 +9,7 @@ public static class Keywords
     {
         {"item", TokenType.Variable},
         {"comparator", TokenType.If},
+        {"otherwise", TokenType.Else},
         {"repeater", TokenType.While},
         {"hopper", TokenType.For},
         {"workbench", TokenType.Function},

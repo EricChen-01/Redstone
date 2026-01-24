@@ -31,6 +31,7 @@ public enum TokenType
     Constant,          // Bedrock
     While,             // Repeater
     If,                // Comparator
+    Else,              // Otherwise
     Function,          // Workbench
     Return,            // Craft
     For,              // Hooper
