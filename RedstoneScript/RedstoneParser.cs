@@ -163,7 +163,7 @@ public class RedstoneParser
 
         var body = ParseBlockStatement();
 
-        return new IfStatementNode(condition, body);
+        return new IfStatementNode(condition, body, null);
     }
 
     private StatementNode ParseWhileStatement()
