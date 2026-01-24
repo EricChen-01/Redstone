@@ -22,5 +22,3 @@ public class WhileSatementNode: StatementNode
         {AstPrinter.Indent(indent + 2)}{Body}";
     }
 }
-
-#endregion

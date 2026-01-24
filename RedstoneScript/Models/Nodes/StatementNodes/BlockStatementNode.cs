@@ -25,5 +25,3 @@ public class BlockStatementNode : StatementNode
         return sb.ToString().TrimEnd();
     }
 }
-
-#endregion
