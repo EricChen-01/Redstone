@@ -39,3 +39,11 @@
     chat("oh boy it's an infinite loop!)
   }
   ```
+- Added break support
+  - Example:
+  ```rsd
+  repeater (on) {
+    chat("oh boy it's an infinite loop!)
+    cut
+  }
+  ```

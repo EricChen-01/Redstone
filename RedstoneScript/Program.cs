@@ -96,13 +96,13 @@ void RunProgram(string filePath)
     var tokens = RedstoneTokenizer.Tokenize(sourceCode);
     var parser = new RedstoneParser(tokens);
     var ast = parser.ParseRoot();
-
-    if (!RedstoneInterpreter.ValidateProgram(ast))
+    var interpreter = new RedstoneInterpreter();
+    if (!interpreter.ValidateProgram(ast))
     {
         return;
     }
     
-    RedstoneInterpreter.EvaluateProgram(ast, globalScope);
+    interpreter.EvaluateProgram(ast, globalScope);
 }
 
 void RunRepl()
@@ -164,7 +164,7 @@ void RunRepl()
                 Console.ResetColor();
             }
 
-            var result = RedstoneInterpreter.EvaluateProgram(ast, globalScope);
+            var result = new RedstoneInterpreter().EvaluateProgram(ast, globalScope);
 
             Console.ForegroundColor = ConsoleColor.Green;
 

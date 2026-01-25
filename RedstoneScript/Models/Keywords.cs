@@ -11,6 +11,8 @@ public static class Keywords
         {"comparator", TokenType.If},
         {"otherwise", TokenType.Else},
         {"repeater", TokenType.While},
+        {"cut", TokenType.Break},
+        {"pulse", TokenType.Continue},
         {"hopper", TokenType.For},
         {"workbench", TokenType.Function},
         {"craft", TokenType.Return},

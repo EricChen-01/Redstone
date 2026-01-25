@@ -1,5 +1,6 @@
 ﻿using RedstoneScript.AST.Parser;
 using RedstoneScript.Interpreter;
+using RedstoneScript.Interpreter.Signals;
 using RedstoneScript.Lexer;
 
 namespace RedstoneScript.Test
@@ -192,6 +193,47 @@ namespace RedstoneScript.Test
 
             Assert.Contains("2", output);
         }
+
+        [Fact]
+        public void WhileStatement_Cut_ExitsRepeater_17()
+        {
+            var source = Load("17.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("3", output);
+            Assert.Contains("done", output);
+
+            Assert.DoesNotContain("4", output);
+        }
+
+        [Fact]
+        public void WhileStatement_CutInsideNestedIf_WorksCorrectly_18()
+        {
+            var source = Load("18.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("5", output);
+            Assert.Contains("4", output);
+            Assert.Contains("3", output);
+
+            Assert.DoesNotContain("2", output);
+            Assert.Contains("signal stopped", output);
+        }
+
+        [Fact]
+        public void Cut_OutsideRepeater_ThrowsError_19()
+        {
+            var source = @"
+                cut
+            ";
+
+            var ex = Assert.Throws<InvalidOperationException>(() => CaptureConsoleOutput(source));
+
+            Assert.Contains("'cut' used outside of a loop", ex.Message);
+        }
+
     
         private static string Load(string fileName)
         {
@@ -214,7 +256,10 @@ namespace RedstoneScript.Test
                 var scope = new Scope();
                 var tokens = RedstoneTokenizer.Tokenize(source);
                 var program = new RedstoneParser(tokens).ParseRoot();
-                var interpreter = RedstoneInterpreter.EvaluateProgram(program, scope);
+                var interpreter = new RedstoneInterpreter();
+                
+                interpreter.ValidateProgram(program);
+                interpreter.EvaluateProgram(program, scope);
             });
 
             return output;

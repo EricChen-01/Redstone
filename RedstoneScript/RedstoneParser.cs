@@ -2,7 +2,6 @@ using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
 
-
 public class RedstoneParser
 {
     private List<Token> tokens = new();
@@ -50,12 +49,14 @@ public class RedstoneParser
                 return ParseIfStatement();
             case TokenType.While:
                 return ParseWhileStatement();
+            case TokenType.Break:
+                return ParseBreakStatement();
             default:
                 return ParseExpression();
         }
     }
-    
-#region Statements
+
+    #region Statements
     private StatementNode ParseFunctionDeclaration()
     {
         Expect(TokenType.Function);
@@ -192,6 +193,13 @@ public class RedstoneParser
         var body = ParseBlockStatement();
 
         return new WhileSatementNode(condition, body);
+    }
+
+    private StatementNode ParseBreakStatement()
+    {
+        Expect(TokenType.Break);
+        Expect(TokenType.NewLine, "Redstone Node Parser: Expected a new line after a break token");
+        return new BreakStatementNode();
     }
 #endregion
 

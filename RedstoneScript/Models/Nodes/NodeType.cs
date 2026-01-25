@@ -12,6 +12,8 @@ public enum NodeType
     ReturnStatement,
     IfStatement,
     WhileStatement,
+    ForStatement,
+    BreakStatement,
 
     // Expressions
     NumericLiteral,

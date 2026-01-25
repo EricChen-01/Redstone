@@ -1,11 +1,15 @@
 using RedstoneScript.AST;
+using RedstoneScript.Interpreter.Signals;
 
 namespace RedstoneScript.Interpreter;
 
 public class RedstoneInterpreter
 {
+    private Stack<NodeType> loopStack = new Stack<NodeType>();
+    public RedstoneInterpreter()
+    {}
 
-    public static RuntimeValue EvaluateProgram(ProgramNode programNode, Scope scope)
+    public RuntimeValue EvaluateProgram(ProgramNode programNode, Scope scope)
     {
         RuntimeValue lastRuntimeValue = new NullValue();
 
@@ -17,7 +21,7 @@ public class RedstoneInterpreter
         return lastRuntimeValue;
     }
 
-    public static bool ValidateProgram(ProgramNode programNode)
+    public bool ValidateProgram(ProgramNode programNode)
     {
         for (int i = 0; i < programNode.Nodes.Count; i++)
         {
@@ -51,7 +55,7 @@ public class RedstoneInterpreter
     /// <summary>
     /// Evaluates the current Node given the current scope.
     /// </summary>
-    private static RuntimeValue Evaluate(INode node, Scope scope)
+    private RuntimeValue Evaluate(INode node, Scope scope)
     {
         return node.Type switch
         {
@@ -70,16 +74,17 @@ public class RedstoneInterpreter
             NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
             NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
             NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
+            NodeType.BreakStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new BreakSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'cut' used outside of a loop"),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
  
-    private static RuntimeValue EvaluateIdentifierExpression(IdentifierExpressionNode identifierExpressionNode, Scope scope)
+    private RuntimeValue EvaluateIdentifierExpression(IdentifierExpressionNode identifierExpressionNode, Scope scope)
     {
         return scope.ResolveVariable(identifierExpressionNode.Name);
     }
 
-    private static RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode, Scope scope)
+    private RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode, Scope scope)
     {
         var left = Evaluate(binaryExpressionNode.Left, scope);
         var right = Evaluate(binaryExpressionNode.Right, scope);
@@ -112,7 +117,7 @@ public class RedstoneInterpreter
         );
     }
 
-    private static BooleanValue EvaluateEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue lNum && right is NumberValue rNum)
         {
@@ -130,7 +135,7 @@ public class RedstoneInterpreter
         return new BooleanValue(false);
     }
 
-    private static BooleanValue EvaluateNotEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateNotEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue lNum && right is NumberValue rNum)
         {
@@ -148,35 +153,35 @@ public class RedstoneInterpreter
         return new BooleanValue(true);
     }
 
-    private static BooleanValue EvaluateLessThanComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateLessThanComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue l && right is NumberValue r)
             return new BooleanValue(l.Value < r.Value);
         throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} < {right.Type}");
     }
 
-    private static BooleanValue EvaluateLessThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateLessThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue l && right is NumberValue r)
             return new BooleanValue(l.Value <= r.Value);
         throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} <= {right.Type}");
     }
 
-    private static BooleanValue EvaluateGreaterThanComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateGreaterThanComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue l && right is NumberValue r)
             return new BooleanValue(l.Value > r.Value);
         throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} > {right.Type}");
     }
 
-    private static BooleanValue EvaluateGreaterThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
+    private BooleanValue EvaluateGreaterThanEqualComparisonExpression(RuntimeValue left, RuntimeValue right)
     {
         if (left is NumberValue l && right is NumberValue r)
             return new BooleanValue(l.Value >= r.Value);
         throw new InvalidOperationException($"Redstone Interpreter: Cannot compare {left.Type} >= {right.Type}");
     }
 
-    private static NumberValue EvaluateNumericExpression(NumberValue left, NumberValue right, string operatorSign)
+    private NumberValue EvaluateNumericExpression(NumberValue left, NumberValue right, string operatorSign)
     {
         switch (operatorSign)
         {
@@ -197,7 +202,7 @@ public class RedstoneInterpreter
         }
     }   
 
-    private static RuntimeValue EvaluateVariableDeclarationStatement(VariableDelarationNode variableDelarationNode, Scope scope)
+    private RuntimeValue EvaluateVariableDeclarationStatement(VariableDelarationNode variableDelarationNode, Scope scope)
     {
         var name = variableDelarationNode.Identifier;
         var isConstant = variableDelarationNode.IsConstant;
@@ -207,7 +212,7 @@ public class RedstoneInterpreter
         return scope.DefineVariable(name, finalValue, isConstant);
     }
 
-    private static RuntimeValue EvaluateAssignmentExpression(AssignmentExpressionNode assignmentExpressionNode, Scope scope)
+    private RuntimeValue EvaluateAssignmentExpression(AssignmentExpressionNode assignmentExpressionNode, Scope scope)
     {
         switch (assignmentExpressionNode.LeftExpression)
         {
@@ -221,7 +226,7 @@ public class RedstoneInterpreter
         }
     }
 
-    private static RuntimeValue EvaluateObjectExpression(ObjectExpressionNode objectExpressionNode, Scope scope)
+    private RuntimeValue EvaluateObjectExpression(ObjectExpressionNode objectExpressionNode, Scope scope)
     {
         var newObject = new ObjectValue(new Dictionary<string, RuntimeValue>());
 
@@ -236,7 +241,7 @@ public class RedstoneInterpreter
         return newObject;
     }
 
-    private static RuntimeValue EvaluateCallExpression(CallExpressionNode callExpressionNode, Scope scope)
+    private RuntimeValue EvaluateCallExpression(CallExpressionNode callExpressionNode, Scope scope)
     {
         List<RuntimeValue> arguments = callExpressionNode.Arguments
             .Select(arg => Evaluate(arg, scope))
@@ -274,7 +279,7 @@ public class RedstoneInterpreter
         throw new InvalidOperationException($"Redstone Interpreter: Could not determine function to run. got: {functionValue.Type}");
     }
 
-    private static RuntimeValue EvaluateMemberAccessExpression(MemberAccessExpression memberAccessExpression, Scope scope)
+    private RuntimeValue EvaluateMemberAccessExpression(MemberAccessExpression memberAccessExpression, Scope scope)
     {
         var objectValue = Evaluate(memberAccessExpression.Object, scope); // evaluate the memberAccessExpression first.
         if (objectValue is not ObjectValue evaluatedObject)
@@ -297,7 +302,7 @@ public class RedstoneInterpreter
         return value;
     }
 
-    private static RuntimeValue EvaluateFunctionDeclarationStatement(FunctionDelarationNode functionDelarationNode, Scope scope)
+    private RuntimeValue EvaluateFunctionDeclarationStatement(FunctionDelarationNode functionDelarationNode, Scope scope)
     {
         var name = functionDelarationNode.Name;
         var parameters = functionDelarationNode.Parameters;
@@ -307,7 +312,7 @@ public class RedstoneInterpreter
         return scope.DefineVariable(name, newFunction, true);
     }
 
-    private static RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
+    private RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
     {
         foreach (var statement in statements)
         {
@@ -316,7 +321,7 @@ public class RedstoneInterpreter
         return new VoidValue();
     }
 
-    private static RuntimeValue EvaluateIfStatement(IfStatementNode node, Scope scope)
+    private RuntimeValue EvaluateIfStatement(IfStatementNode node, Scope scope)
     {
         var conditionValue = Evaluate(node.Condition, scope);
 
@@ -351,8 +356,9 @@ public class RedstoneInterpreter
         return new VoidValue();
     }
 
-    private static RuntimeValue EvaluateWhileStatement(WhileSatementNode node, Scope scope)
+    private RuntimeValue EvaluateWhileStatement(WhileSatementNode node, Scope scope)
     {
+        loopStack.Push(NodeType.WhileStatement);
         var IsTruthy = () => {
             var value = Evaluate(node.Condition, scope);
             if (value is not BooleanValue b)
@@ -361,25 +367,33 @@ public class RedstoneInterpreter
             }
             return b.Value;
         };
-   
-        while (IsTruthy())
-        {
-            var whileStatementBody = node.Body.Statements;
-            var whileSatementScope = new Scope(scope);
-            EvaluateBlockStatement(whileStatementBody, whileSatementScope);
-        }
 
+        try
+        {
+            while (IsTruthy())
+            {
+                try
+                {
+                    var whileStatementBody = node.Body.Statements;
+                    var whileSatementScope = new Scope(scope);
+                    EvaluateBlockStatement(whileStatementBody, whileSatementScope);
+                }
+                catch (BreakSignal)
+                {
+                    break;
+                }
+                catch (ContinueSignal)
+                {
+                    continue;
+                }
+            }
+        }
+        finally
+        {
+            loopStack.Pop();   
+        }
         return new VoidValue();
     }
-
-    // private static object EvaluateReturnStatement(ReturnStatementNode node, Scope scope)
-    // {
-    //     var value = node.Value == null
-    //         ? new NullValue()
-    //         : Evaluate(node.Value, scope);
-
-    //     return new ReturnSignal(value);
-    // }
 
 #region Helpers
     /// <summary>

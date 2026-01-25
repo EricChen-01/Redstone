@@ -34,5 +34,7 @@ public enum TokenType
     Else,              // Otherwise
     Function,          // Workbench
     Return,            // Craft
-    For,              // Hooper
+    For,               // Hooper
+    Break,             // Cut
+    Continue,          // Pulse
 }

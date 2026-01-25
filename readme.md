@@ -55,6 +55,8 @@ negative(5)
 | `air`            | `null`                       |
 | `on`             | `true`                       |
 | `off`            | `false`                      |
+| `cut`            | `break`                      |
+| `pulse`          | `continue`                   |
 
 Example:
 

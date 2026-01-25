@@ -1,0 +1,13 @@
+item count = 0
+
+repeater (count < 10) {
+    chat(count)
+
+    comparator (count == 3) {
+        cut
+    }
+
+    count = count + 1
+}
+
+chat("done")

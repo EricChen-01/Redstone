@@ -23,3 +23,4 @@
 - Added else keyword support
 - Added while loop keyword support
 - Added else if keyword support
+- Added break and continue support

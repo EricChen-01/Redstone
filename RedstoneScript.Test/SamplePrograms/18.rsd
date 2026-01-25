@@ -1,0 +1,14 @@
+item power = 5
+
+repeater (power > 0) {
+    comparator (power == 2) {
+        comparator (on) {
+            cut
+        }
+    }
+
+    chat(power)
+    power = power - 1
+}
+
+chat("signal stopped")
