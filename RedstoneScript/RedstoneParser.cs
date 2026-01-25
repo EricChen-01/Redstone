@@ -166,8 +166,16 @@ public class RedstoneParser
         SkipNewLines();
         if (Match(TokenType.Else))
         {
-            var elseBody = ParseBlockStatement();  
-            return new IfStatementNode(condition, body, elseBody); 
+            if (Check(TokenType.If)) // else if branch
+            {
+                var elseIfBody = ParseIfStatement();  
+                return new IfStatementNode(condition, body, elseIfBody);   
+            }
+            else // else branch
+            {
+                var elseBody = ParseBlockStatement();  
+                return new IfStatementNode(condition, body, elseBody);    
+            }
         }
 
         return new IfStatementNode(condition, body, null);

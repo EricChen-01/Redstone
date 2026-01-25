@@ -4,9 +4,9 @@ public class IfStatementNode : StatementNode
 {
     public ExpressionNode Condition { get; }
     public BlockStatementNode Body { get; }
-    public BlockStatementNode? Else { get; }
+    public StatementNode? Else { get; }
 
-    public IfStatementNode(ExpressionNode condition, BlockStatementNode body, BlockStatementNode? @else)
+    public IfStatementNode(ExpressionNode condition, BlockStatementNode body, StatementNode? @else)
         : base(NodeType.IfStatement)
     {
         Condition = condition;
