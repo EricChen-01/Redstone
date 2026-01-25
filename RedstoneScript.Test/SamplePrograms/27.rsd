@@ -1,0 +1,16 @@
+workbench testLoopControl() {
+    item total = 0
+    repeater (total < 5) {
+        total = total + 1
+        comparator (total == 2) {
+            pulse
+        }
+        comparator (total == 4) {
+            cut
+        }
+    }
+    craft total
+}
+
+item e = testLoopControl()
+chat(e)

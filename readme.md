@@ -57,6 +57,7 @@ negative(5)
 | `off`            | `false`                      |
 | `cut`            | `break`                      |
 | `pulse`          | `continue`                   |
+| `craft`          | `return`                     |
 
 Example:
 

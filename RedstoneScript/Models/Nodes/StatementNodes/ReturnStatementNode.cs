@@ -10,7 +10,6 @@ public class ReturnStatementNode : StatementNode
         Value = value;
     }
 
-
     public override string ToString(int indent)
     {
         return Value == null

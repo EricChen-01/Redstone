@@ -275,8 +275,91 @@ namespace RedstoneScript.Test
             Assert.DoesNotContain("loop end: 2", output);
         }
 
+        [Fact]
+        public void ReturnStatement_SimpleFunction_WorksCorrectly_23()
+        {
+            // Load the Redstone program
+            var source = Load("23.rsd");
 
-    
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+
+            // Check that the output contains the returned value
+            Assert.Contains("42", output);
+        }
+
+        [Fact]
+        public void ReturnStatement_FunctionWithoutReturn_ReturnsVoid_24()
+        {
+            // Load the Redstone program
+            var source = Load("24.rsd");
+
+            // Capture console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+
+            // Since no return, expect void output
+            // Depending on your interpreter, void might print empty string or "void"
+            Assert.True(string.IsNullOrWhiteSpace(output) || output.Contains("void"));
+        }
+
+        [Fact]
+        public void ReturnStatement_InsideLoop_WorksCorrectly_25()
+        {
+            // Load the Redstone program
+            var source = Load("25.rsd");
+
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+
+            // Check that the output contains the returned value
+            Assert.Contains("3", output);
+        }   
+
+        [Fact]
+        public void ReturnStatement_NestedFunctionCalls_WorksCorrectly_26()
+        {
+            // Load the Redstone program
+            var source = Load("26.rsd");
+
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+
+            // Check that the output contains the returned value from nested functions
+            Assert.Contains("99", output);
+        }
+
+        [Fact]
+        public void ReturnStatement__WorksCorrectly_27()
+        {
+            // Load the Redstone program
+            var source = Load("27.rsd");
+
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+
+            // Check that the output contains the correct returned value
+            Assert.Contains("4", output);
+        }
+
+        [Fact]
+        public void ReturnStatement_OutOfFunction_ThrowsError_28()
+        {
+            var source = Load("28.rsd");
+
+            var ex = Assert.Throws<InvalidOperationException>(() => CaptureConsoleOutput(source));
+            Assert.Contains($"craft' used outside of a function", ex.Message);
+        }
+
+        [Fact]
+        public void ReturnStatement_InObject_ThrowsError_29()
+        {
+            // Load the Redstone program
+            var source = Load("29.rsd");
+
+            // Capture the console output (Chat calls)
+            var ex = Assert.Throws<Exception>(() => CaptureConsoleOutput(source));
+        }
+
         private static string Load(string fileName)
         {
             var baseDir = AppContext.BaseDirectory;

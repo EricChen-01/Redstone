@@ -24,3 +24,7 @@
 - Added while loop keyword support
 - Added else if keyword support
 - Added break and continue support
+
+## [0.0.4] - 
+
+- Added return support

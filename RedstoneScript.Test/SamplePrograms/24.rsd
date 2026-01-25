@@ -1,0 +1,7 @@
+workbench noReturn() {
+    item x = 10
+    item y = x + 5
+}
+
+item b = noReturn()
+chat(b)

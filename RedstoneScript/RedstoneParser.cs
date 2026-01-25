@@ -54,6 +54,8 @@ public class RedstoneParser
                 return ParseBreakStatement();
             case TokenType.Continue:
                 return ParseContinueStatement();
+            case TokenType.Return:
+                return ParseReturnStatement();
             default:
                 return ParseExpression();
         }
@@ -116,7 +118,7 @@ public class RedstoneParser
     private StatementNode ParseVariableDeclaration()
     {
         var isConstant = Advance().Type == TokenType.Constant;
-        var identifierName = Expect(TokenType.Identifier, "Expected a variable name.").Value;
+        var identifierName = Expect(TokenType.Identifier, $"Expected a variable name. Got: {Current().Type} : {Current().Value}").Value;
         
         // check if it's any of the keywords that are restricted
         if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
@@ -211,6 +213,16 @@ public class RedstoneParser
         Expect(TokenType.NewLine, "Redstone Node Parser: Expected a new line after a continue token");
         return new ContinueSignalNode();
     }
+
+    private StatementNode ParseReturnStatement()
+    {
+        Expect(TokenType.Return);
+        var returnExpression = ParseExpression();
+        Match(TokenType.NewLine);
+
+        return new ReturnStatementNode(returnExpression);
+    }
+
 #endregion
 
 #region Expressions

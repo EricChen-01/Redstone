@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using RedstoneScript.AST;
 using RedstoneScript.Interpreter.Signals;
 
@@ -6,6 +7,7 @@ namespace RedstoneScript.Interpreter;
 public class RedstoneInterpreter
 {
     private Stack<NodeType> loopStack = new Stack<NodeType>();
+    private Stack<NodeType> callStack = new Stack<NodeType>();
     public RedstoneInterpreter()
     {}
 
@@ -76,6 +78,7 @@ public class RedstoneInterpreter
             NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
             NodeType.BreakStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new BreakSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'cut' used outside of a loop"),
             NodeType.ContinueStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new ContinueSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'pulse' used outside of a loop"),
+            NodeType.ReturnStatement => Evaluate<ReturnStatementNode>(node, scope, EvaluateReturnStatement),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
@@ -257,7 +260,21 @@ public class RedstoneInterpreter
 
         if (functionValue is NativeFunctionValue nativeFunction)
         {
-            return nativeFunction.FunctionCall(arguments, scope);
+            // Push to callStack so return knows it's inside a function
+        callStack.Push(NodeType.CallExpression);
+            try
+            {
+                nativeFunction.FunctionCall(arguments, scope);
+                return new VoidValue();
+            }
+            catch (ReturnSignal @return)
+            {
+                return @return.Value;
+            }
+            finally
+            {
+                callStack.Pop();
+            }
         }
         else if (functionValue is FunctionValue function)
         {
@@ -274,7 +291,20 @@ public class RedstoneInterpreter
                 functionScope.DefineVariable(parameter, arguments[i], false);
             }
             
-            return EvaluateBlockStatement(function.Body, functionScope);
+            callStack.Push(NodeType.CallExpression);
+            try
+            {
+                EvaluateBlockStatement(function.Body, functionScope);
+                return new VoidValue();
+            }
+            catch(ReturnSignal @return)
+            {
+                return @return.Value;
+            }
+            finally
+            {
+                callStack.Pop();
+            }
         }
 
         throw new InvalidOperationException($"Redstone Interpreter: Could not determine function to run. got: {functionValue.Type}");
@@ -313,7 +343,7 @@ public class RedstoneInterpreter
         return scope.DefineVariable(name, newFunction, true);
     }
 
-    private RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
+    private RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope, bool requiresReturn = false)
     {
         foreach (var statement in statements)
         {
@@ -394,6 +424,21 @@ public class RedstoneInterpreter
             loopStack.Pop();   
         }
         return new VoidValue();
+    }
+
+    private RuntimeValue EvaluateReturnStatement(ReturnStatementNode @return, Scope scope)
+    {
+        // Make sure we're inside a function
+        if (!callStack.Any(type => type == NodeType.CallExpression))
+        {
+            throw new InvalidOperationException("Redstone Interpreter: 'craft' used outside of a function.");   
+        }
+
+        var value = @return.Value != null 
+                    ? Evaluate(@return.Value, scope)
+                    : new VoidValue();
+
+        throw new ReturnSignal(value);
     }
 
 #region Helpers

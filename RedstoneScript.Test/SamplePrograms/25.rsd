@@ -1,0 +1,12 @@
+workbench loopReturn(limit) {
+    item sum = 0
+    repeater (sum < limit) {
+        sum = sum + 1
+        comparator (sum == 3) {
+            craft sum
+        }
+    }
+}
+
+item c = loopReturn(5)
+chat(c)

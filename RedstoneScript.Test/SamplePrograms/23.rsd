@@ -2,5 +2,5 @@ workbench simpleReturn() {
     craft 42
 }
 
-item number = simpleReturn()
-chat(number)
+item a = simpleReturn()
+chat(a)
