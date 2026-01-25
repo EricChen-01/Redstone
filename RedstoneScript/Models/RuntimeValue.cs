@@ -148,23 +148,6 @@ public class FunctionValue : RuntimeValue
     }
 }
 
-// public class IfStatementValue : RuntimeValue
-// {
-//     public List<INode> Body { get; }
-//     public Scope DeclarationScope { get; }
-
-//     public IfStatementValue(List<INode> body, Scope scope) : base(RuntimeValueType.If)
-//     {
-//         Body = body;
-//         DeclarationScope = scope;
-//     }
-
-//     public override string ToString()
-//     {
-//         return "<If Statement>";
-//     }
-// }
-
 public class VoidValue : RuntimeValue
 {
     public VoidValue() : base(RuntimeValueType.Void)
