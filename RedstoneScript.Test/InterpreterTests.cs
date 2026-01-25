@@ -225,14 +225,56 @@ namespace RedstoneScript.Test
         [Fact]
         public void Cut_OutsideRepeater_ThrowsError_19()
         {
-            var source = @"
-                cut
-            ";
+            var source = Load("19.rsd");
 
             var ex = Assert.Throws<InvalidOperationException>(() => CaptureConsoleOutput(source));
 
             Assert.Contains("'cut' used outside of a loop", ex.Message);
         }
+
+        [Fact]
+        public void WhileStatement_PulseInsideNestedIf_WorksCorrectly_20()
+        {
+            var source = Load("20.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            Assert.Contains("12", output);
+        }
+
+        [Fact]
+        public void PulseStatement_OutsideRepeater_ThrowsError_21()
+        {
+            var source = Load("21.rsd");
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                CaptureConsoleOutput(source);
+            });
+
+            Assert.Contains("'pulse' used outside of a loop", exception.Message);
+        }
+
+        [Fact]
+        public void PulseStatement_InsideNestedComparator_WorksCorrectly_22()
+        {
+            var source = Load("22.rsd");
+
+            var output = CaptureConsoleOutput(source);
+
+            // Nested comparator message
+            Assert.Contains("nested comparator: 1", output);
+
+            // Loop end messages
+            Assert.Contains("loop end: 1", output);
+            Assert.Contains("loop end: 3", output);
+            Assert.Contains("loop end: 4", output);
+            Assert.Contains("loop end: 5", output);
+
+            // Make sure skipped iteration is not present
+            Assert.DoesNotContain("loop end: 2", output);
+        }
+
 
     
         private static string Load(string fileName)

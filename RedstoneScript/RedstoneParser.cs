@@ -1,3 +1,4 @@
+using RedstoneScript.Interpreter.Signals;
 using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
@@ -51,12 +52,14 @@ public class RedstoneParser
                 return ParseWhileStatement();
             case TokenType.Break:
                 return ParseBreakStatement();
+            case TokenType.Continue:
+                return ParseContinueStatement();
             default:
                 return ParseExpression();
         }
     }
 
-    #region Statements
+#region Statements
     private StatementNode ParseFunctionDeclaration()
     {
         Expect(TokenType.Function);
@@ -201,6 +204,13 @@ public class RedstoneParser
         Expect(TokenType.NewLine, "Redstone Node Parser: Expected a new line after a break token");
         return new BreakStatementNode();
     }
+
+    private StatementNode ParseContinueStatement()
+    {
+        Expect(TokenType.Continue);
+        Expect(TokenType.NewLine, "Redstone Node Parser: Expected a new line after a continue token");
+        return new ContinueSignalNode();
+    }
 #endregion
 
 #region Expressions
@@ -295,7 +305,7 @@ public class RedstoneParser
 
         // expect a new line character
         Expect(TokenType.NewLine, "New line character expected for a object expression.");
-
+        SkipNewLines(); // skip any new leading new lines or empty white spaces
         // { key }
         while (!Check(TokenType.BraceClose)) // loop and parse while it's not end of file or a }
         {

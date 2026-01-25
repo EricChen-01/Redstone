@@ -1,0 +1,17 @@
+item i = 0
+
+repeater (i < 5) {
+    i = i + 1
+
+    comparator (i >= 1) {
+        comparator (i == 2) {
+            pulse
+        }
+
+        comparator (i == 1) {
+            chat("nested comparator: ", i)
+        }
+    }
+
+    chat("loop end: ", i)
+}

@@ -75,6 +75,7 @@ public class RedstoneInterpreter
             NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
             NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
             NodeType.BreakStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new BreakSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'cut' used outside of a loop"),
+            NodeType.ContinueStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new ContinueSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'pulse' used outside of a loop"),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }

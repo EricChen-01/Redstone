@@ -14,6 +14,7 @@ public enum NodeType
     WhileStatement,
     ForStatement,
     BreakStatement,
+    ContinueStatement,
 
     // Expressions
     NumericLiteral,

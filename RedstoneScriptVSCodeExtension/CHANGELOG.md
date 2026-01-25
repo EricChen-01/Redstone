@@ -16,7 +16,7 @@
 - booleans now have their own highlights.
 
 
-## [0.0.3] - 
+## [0.0.3] - 1/25/26
 
 ### Added
 

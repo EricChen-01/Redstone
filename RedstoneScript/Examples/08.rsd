@@ -1,13 +1,13 @@
-item score = 40
+item limit = 5
 
-repeater (score < 50){
-    comparator(score == 48){
-        chat("SCORE IS 48!!")
-    } otherwise comparator (score == 49){
-        chat("SCORE is 49!!!")
-    } otherwise {
-        chat("score is ", score)
+item current = 0
+repeater (current <= limit){
+    comparator (current < limit){
+        current = current + 1
+        chat("pulsing")
+        pulse
     }
 
-    score = score + 1
+    chat("we've hit the limit! ", current)
+    cut
 }

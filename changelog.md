@@ -19,7 +19,7 @@
     }
     ```
 
-## [0.0.3] - 
+## [0.0.3] - 1/25/26
 
 - Added Else and Else if support
   - Example:
@@ -45,5 +45,13 @@
   repeater (on) {
     chat("oh boy it's an infinite loop!)
     cut
+  }
+  ```
+- Added continue support
+- Example:
+  ```rsd
+  repeater (on) {
+    chat("oh boy it's an infinite loop!)
+    pulse
   }
   ```

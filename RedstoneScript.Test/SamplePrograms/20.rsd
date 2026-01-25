@@ -1,0 +1,14 @@
+item i = 0
+item sum = 0
+
+repeater (i < 5) {
+    i = i + 1
+
+    comparator (i == 3) {
+        pulse
+    }
+
+    sum = sum + i
+}
+
+chat(sum)
