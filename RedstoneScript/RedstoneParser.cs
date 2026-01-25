@@ -321,7 +321,7 @@ public class RedstoneParser
         // { key }
         while (!Check(TokenType.BraceClose)) // loop and parse while it's not end of file or a }
         {
-            // // redstone is a new line sensative language so after {, it should expect a new line character.
+            // redstone is a new line sensative language so after {, it should expect a new line character.
             properties.Add(ParsePropertyExpression());
             
             // After a property, match any new lines
@@ -334,7 +334,7 @@ public class RedstoneParser
             }
             else
             {
-                 // if there is a comma, then we should expect a new line right after it.
+                // if there is a comma, then we should expect a new line right after it.
                 while (Match(TokenType.NewLine)) { }
             }            
         }
