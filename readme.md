@@ -30,14 +30,15 @@ The goal of Redstone is to serve both as a learning project for language design 
 * Function declarations
 * Function calls
 * Native functions
-* If Statements
+* If-else Statements
+* While loops
 
 ### Known Limitation
 
-Negative numbers are not supported directly. They can be expressed using subtraction:
-
+Negative numbers are not supported directly. They can be expressed using the negative native function for now:
 ```
-0 - 5
+negative(5)
+// returns -5
 ```
 
 ---
@@ -50,6 +51,7 @@ Negative numbers are not supported directly. They can be expressed using subtrac
 | `bedrock`        | Constant declaration         |
 | `workbench`      | Function declaration         |
 | `comparator`     | If Statement                 |
+| `otherwise`      | Else statement               |
 | `air`            | `null`                       |
 | `on`             | `true`                       |
 | `off`            | `false`                      |
@@ -163,7 +165,6 @@ Planned improvements include:
 
 * Native support for negative numbers
 * For loops
-* While loops
 * Expanded native function library
 * Unary Operators 
 

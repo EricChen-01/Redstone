@@ -21,4 +21,5 @@
 ### Added
 
 - Added else keyword support
-- added while loop keyword support
+- Added while loop keyword support
+- Added else if keyword support

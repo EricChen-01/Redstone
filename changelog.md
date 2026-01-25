@@ -18,3 +18,24 @@
         chat("Hello World!")
     }
     ```
+
+## [0.0.3] - 
+
+- Added Else and Else if support
+  - Example:
+  ```rsd
+  comparator (on){
+    chat("Hello World!")
+  } otherwise comparator (on){
+    chat("hello world!")
+  } otherwise {
+    chat("hello")
+  }
+  ```
+- Added While loops
+  - Example:
+  ```rsd
+  repeater (on) {
+    chat("oh boy it's an infinite loop!)
+  }
+  ```
