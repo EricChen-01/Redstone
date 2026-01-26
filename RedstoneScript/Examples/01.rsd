@@ -1,6 +1,10 @@
 workbench simpleReturn() {
-    craft 42
+    craft 5
 }
 
-item number = simpleReturn()
+item foo = {
+    bar: -5
+}
+
+item number = -foo.bar + simpleReturn()
 chat(number)

@@ -360,6 +360,19 @@ namespace RedstoneScript.Test
             var ex = Assert.Throws<Exception>(() => CaptureConsoleOutput(source));
         }
 
+        [Fact]
+        public void UnaryOperation_UnaryMinus_WorksCorrectly_30()
+        {
+            // Load the Redstone program
+            var source = Load("30.rsd");
+
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+            
+            // should be 10
+            Assert.Contains("10", output);
+        }
+
         private static string Load(string fileName)
         {
             var baseDir = AppContext.BaseDirectory;

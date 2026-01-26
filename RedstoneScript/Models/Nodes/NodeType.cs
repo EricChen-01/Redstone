@@ -26,6 +26,7 @@ public enum NodeType
 
     AssignmentExpression,
     BinaryExpression,
+    UnaryExpression,
 
     ObjectLiteral,
     Property,

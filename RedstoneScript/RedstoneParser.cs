@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using RedstoneScript.Interpreter.Signals;
 using RedstoneScript.Lexer;
 
@@ -292,7 +293,7 @@ public class RedstoneParser
 
     private ExpressionNode ParseMultiplicitiveExpression()
     {
-        var left = ParseMemberCallExpression();
+        var left = ParseUnaryExpression();
 
         while(
             IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
@@ -300,12 +301,24 @@ public class RedstoneParser
             IsToken(TokenType.Operator, OperatorType.MODULUS))
         {
             var operation = Advance().Value;
-            var right = ParseMemberCallExpression();
+            var right = ParseUnaryExpression();
             left = new BinaryExpressionNode(left, right, operation);
         }
 
 
         return left;
+    }
+
+    private ExpressionNode ParseUnaryExpression()
+    {
+        if (IsToken(TokenType.Operator, OperatorType.SUBTRACTION))
+        {
+            var @operator = Advance().Value;
+            var right = ParseUnaryExpression();
+            return new UnaryExpressionNode(@operator, right);
+        }
+
+        return ParseMemberCallExpression();
     }
 
     private ExpressionNode ParseMemberCallExpression()

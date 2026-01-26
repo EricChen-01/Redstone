@@ -66,6 +66,7 @@ public class RedstoneInterpreter
             NodeType.NumericLiteral => Evaluate(node, (NumericExpressionNode node) => new NumberValue(node.Value)),
             NodeType.StringLiteral => Evaluate(node, (StringExpressionNode node) => new StringValue(node.Value)),
             NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, scope, EvaluateBinaryExpression),
+            NodeType.UnaryExpression => Evaluate<UnaryExpressionNode>(node, scope, EvaluateUnaryExpression),
             NodeType.NullLiteral => new NullValue(),
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
             NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
@@ -86,6 +87,26 @@ public class RedstoneInterpreter
     private RuntimeValue EvaluateIdentifierExpression(IdentifierExpressionNode identifierExpressionNode, Scope scope)
     {
         return scope.ResolveVariable(identifierExpressionNode.Name);
+    }
+
+    private RuntimeValue EvaluateUnaryExpression(UnaryExpressionNode unaryExpressionNode, Scope scope)
+    {
+        var @operator = unaryExpressionNode.Operator;
+        var right = Evaluate(unaryExpressionNode.Right, scope);
+        if (@operator == OperatorType.SUBTRACTION)
+        {   
+            if (right is NumberValue number)
+            {
+                return new NumberValue(-number.Value);   
+            }
+            throw new InvalidOperationException($"Redstone Interpreter: Expected a number value for minus unary operator (-). Got {right.Type}");
+        }
+        else if (@operator == OperatorType.BANG)
+        {
+            throw new NotImplementedException();
+        }
+        
+        throw new InvalidOperationException($"Redstone Interpreter: Expected a unary operator (! or -). Got {unaryExpressionNode.Operator}");
     }
 
     private RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode, Scope scope)
