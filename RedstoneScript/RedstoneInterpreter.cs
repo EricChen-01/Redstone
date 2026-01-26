@@ -103,7 +103,11 @@ public class RedstoneInterpreter
         }
         else if (@operator == OperatorType.BANG)
         {
-            throw new NotImplementedException();
+            if (right is BooleanValue boolean)
+            {
+                return new BooleanValue(!boolean.Value);
+            }
+            throw new InvalidOperationException($"Redstone Interpreter: Expected a boolean value for bang unary operator (!). Got {right.Type}");
         }
         
         throw new InvalidOperationException($"Redstone Interpreter: Expected a unary operator (! or -). Got {unaryExpressionNode.Operator}");

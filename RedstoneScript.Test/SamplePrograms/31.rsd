@@ -1,0 +1,4 @@
+item foo = -5
+item bar = foo<30
+
+chat(bar)

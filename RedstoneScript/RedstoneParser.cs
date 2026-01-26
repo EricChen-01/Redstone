@@ -311,7 +311,7 @@ public class RedstoneParser
 
     private ExpressionNode ParseUnaryExpression()
     {
-        if (IsToken(TokenType.Operator, OperatorType.SUBTRACTION))
+        if (IsToken(TokenType.Operator, OperatorType.SUBTRACTION) || IsToken(TokenType.Operator, OperatorType.BANG))
         {
             var @operator = Advance().Value;
             var right = ParseUnaryExpression();

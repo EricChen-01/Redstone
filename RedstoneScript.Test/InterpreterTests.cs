@@ -373,6 +373,19 @@ namespace RedstoneScript.Test
             Assert.Contains("10", output);
         }
 
+        [Fact]
+        public void UnaryOperation_UnaryMinus_WorksCorrectly_31()
+        {
+            // Load the Redstone program
+            var source = Load("31.rsd");
+
+            // Capture the console output (Chat calls)
+            var output = CaptureConsoleOutput(source);
+            
+            // should be on
+            Assert.Contains("on", output);
+        }
+
         private static string Load(string fileName)
         {
             var baseDir = AppContext.BaseDirectory;
