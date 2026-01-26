@@ -166,9 +166,7 @@ Additional native functions will be added over time.
 
 Planned improvements include:
 
-* Native support for negative numbers
 * For loops
 * Expanded native function library
-* Unary Operators 
 
 ---
