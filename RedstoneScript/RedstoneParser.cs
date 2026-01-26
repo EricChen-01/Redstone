@@ -235,6 +235,24 @@ public class RedstoneParser
         return ParseAssignmentExpression();
     }
 
+    private ExpressionNode ParseAssignmentExpression()
+    {
+        var left = ParseComparisionExpression();
+
+        if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
+        {
+            if (!IsValidAssignmentTarget(left))
+            {
+                throw new InvalidOperationException("Invalid assignment target");   
+            }
+
+            var right = ParseAssignmentExpression();
+            return new AssignmentExpressionNode(left, right);
+        }
+
+        return left;
+    }
+
     private ExpressionNode ParseComparisionExpression()
     {
         var left = ParseAdditiveExpression();
@@ -249,24 +267,6 @@ public class RedstoneParser
         {
             var operation = Advance().Value;
             var right = ParseAdditiveExpression();
-            left = new BinaryExpressionNode(left, right, operation);
-        }
-
-
-        return left;
-    }
-
-    private ExpressionNode ParseMultiplicitiveExpression()
-    {
-        var left = ParseMemberCallExpression();
-
-        while(
-            IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
-            IsToken(TokenType.Operator, OperatorType.DIVISION) || 
-            IsToken(TokenType.Operator, OperatorType.MODULUS))
-        {
-            var operation = Advance().Value;
-            var right = ParseMemberCallExpression();
             left = new BinaryExpressionNode(left, right, operation);
         }
 
@@ -290,22 +290,100 @@ public class RedstoneParser
         return left;
     }
 
-    private ExpressionNode ParseAssignmentExpression()
+    private ExpressionNode ParseMultiplicitiveExpression()
     {
-        var left = ParseComparisionExpression();
+        var left = ParseMemberCallExpression();
 
-        if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
+        while(
+            IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
+            IsToken(TokenType.Operator, OperatorType.DIVISION) || 
+            IsToken(TokenType.Operator, OperatorType.MODULUS))
         {
-            if (!IsValidAssignmentTarget(left))
-            {
-                throw new InvalidOperationException("Invalid assignment target");   
-            }
-
-            var right = ParseAssignmentExpression();
-            return new AssignmentExpressionNode(left, right);
+            var operation = Advance().Value;
+            var right = ParseMemberCallExpression();
+            left = new BinaryExpressionNode(left, right, operation);
         }
 
+
         return left;
+    }
+
+    private ExpressionNode ParseMemberCallExpression()
+    {
+        var member = ParseMemberExpression();
+
+        if (Match(TokenType.ParenthesisOpen))
+        {
+            return ParseCallExpression(member);
+        }
+
+        return member;
+    }
+
+    private ExpressionNode ParseCallExpression(ExpressionNode memberCall)
+    {
+        ExpressionNode callExpression = new CallExpressionNode(memberCall, ParseCallArguments());
+
+        if (Match(TokenType.ParenthesisOpen))
+        {
+            callExpression = ParseCallExpression(callExpression);
+        }
+
+        return callExpression;
+    }
+
+    private ExpressionNode ParseMemberExpression()
+    {
+        var objectNode = ParsePrimaryExpression();
+
+        while (Match(TokenType.Dot))
+        {
+            var property = ParsePrimaryExpression(); // should be an identifier.
+
+            if (property.Type != NodeType.Identifier)
+            {
+                throw new InvalidOperationException($"Redstone Parser: Expected a NodeType.Identifier. Got: {property.Type}");
+            }
+
+            objectNode = new MemberAccessExpression(objectNode, property);
+        }
+
+        return objectNode;
+    }
+
+    private ExpressionNode ParsePrimaryExpression()
+    {
+        var token = Current();
+        
+        switch (token.Type)
+        {
+            case TokenType.Number:
+                if (double.TryParse(Advance().Value, out double parsedDouble))
+                    return new NumericExpressionNode(parsedDouble);
+                throw new InvalidOperationException("Redstone Node Parser: The parser tried to parse a TokenType.Number, but failed.");
+            case TokenType.Identifier:
+                return new IdentifierExpressionNode(Advance().Value);
+            case TokenType.ParenthesisOpen:
+                Advance();
+                var expression = ParseExpression();
+                Expect(TokenType.ParenthesisClose, "Unexpected token found. Expected closing parenthesis.");
+                return expression;
+            case TokenType.Null:
+                Advance();
+                return new NullExpressionNode();
+            case TokenType.True:
+                Advance();
+                return new BooleanExpressionNode(true);
+            case TokenType.False:
+                Advance();
+                return new BooleanExpressionNode(false);
+            case TokenType.String:
+                return new StringExpressionNode(Advance().Value);
+            case TokenType.BraceOpen:
+                return ParseObjectExpression();
+            default:
+                throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
+        }
     }
 
     private ExpressionNode ParseObjectExpression()
@@ -358,84 +436,6 @@ public class RedstoneParser
 
         // shorthand { key }
         return new PropertyExpressionNode(propertyName);
-    }
-
-    private ExpressionNode ParsePrimaryExpression()
-    {
-        var token = Current();
-        
-        switch (token.Type)
-        {
-            case TokenType.Number:
-                if (double.TryParse(Advance().Value, out double parsedDouble))
-                    return new NumericExpressionNode(parsedDouble);
-                throw new InvalidOperationException("Redstone Node Parser: The parser tried to parse a TokenType.Number, but failed.");
-            case TokenType.Identifier:
-                return new IdentifierExpressionNode(Advance().Value);
-            case TokenType.ParenthesisOpen:
-                Advance();
-                var expression = ParseExpression();
-                Expect(TokenType.ParenthesisClose, "Unexpected token found. Expected closing parenthesis.");
-                return expression;
-            case TokenType.Null:
-                Advance();
-                return new NullExpressionNode();
-            case TokenType.True:
-                Advance();
-                return new BooleanExpressionNode(true);
-            case TokenType.False:
-                Advance();
-                return new BooleanExpressionNode(false);
-            case TokenType.String:
-                return new StringExpressionNode(Advance().Value);
-            case TokenType.BraceOpen:
-                return ParseObjectExpression();
-            default:
-                throw new Exception($"Redstone Node Parser: Unhandled parsing error: {token.Type} was not handled. Could it be that it's not supported yet?");
-        }
-    }
-
-    private ExpressionNode ParseCallExpression(ExpressionNode memberCall)
-    {
-        ExpressionNode callExpression = new CallExpressionNode(memberCall, ParseCallArguments());
-
-        if (Match(TokenType.ParenthesisOpen))
-        {
-            callExpression = ParseCallExpression(callExpression);
-        }
-
-        return callExpression;
-    }
-
-    private ExpressionNode ParseMemberCallExpression()
-    {
-        var member = ParseMemberExpression();
-
-        if (Match(TokenType.ParenthesisOpen))
-        {
-            return ParseCallExpression(member);
-        }
-
-        return member;
-    }
-
-    private ExpressionNode ParseMemberExpression()
-    {
-        var objectNode = ParsePrimaryExpression();
-
-        while (Match(TokenType.Dot))
-        {
-            var property = ParsePrimaryExpression(); // should be an identifier.
-
-            if (property.Type != NodeType.Identifier)
-            {
-                throw new InvalidOperationException($"Redstone Parser: Expected a NodeType.Identifier. Got: {property.Type}");
-            }
-
-            objectNode = new MemberAccessExpression(objectNode, property);
-        }
-
-        return objectNode;
     }
 
     private List<ExpressionNode> ParseCallArguments()
