@@ -15,7 +15,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.rsd",
-					"match": "\\b(item|bedrock|workbench|repeater|comparator|otherwise|cut|pulse|craft)\\b"
+					"match": "\\b(item|bedrock|workbench|repeater|comparator|otherwise|cut|pulse|craft|hopper)\\b"
 				}
 			]
 		},
@@ -61,7 +61,15 @@
 					"match": "\\b(on|off)\\b"
 				}
   			]
-		}
+		},
+		"comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.rsd",
+                    "match": "//.*$"
+                }
+            ]
+        }
 	},
 	"scopeName": "source.redstone"
 }

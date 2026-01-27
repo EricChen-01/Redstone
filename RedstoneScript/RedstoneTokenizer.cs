@@ -32,6 +32,16 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
+            if (character == '/' && currentCharacterIndex + 1 < sourceCode.Length && sourceCode[currentCharacterIndex + 1] == '/')
+            {
+                // Skip until end of line or end of file
+                while (currentCharacterIndex < sourceCode.Length && sourceCode[currentCharacterIndex] != '\n')
+                {
+                    currentCharacterIndex++;
+                }
+                continue;
+            }
+
             // handles boolean operators like ==, !=, <, <=, >, >=, and !
             if ("=!<>".Contains(character))
             {
