@@ -77,6 +77,7 @@ public class RedstoneInterpreter
             NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
             NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
             NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
+            NodeType.ForStatement => Evaluate<ForStatementNode>(node, scope, EvaluateForStatement),
             NodeType.BreakStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new BreakSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'cut' used outside of a loop"),
             NodeType.ContinueStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new ContinueSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'pulse' used outside of a loop"),
             NodeType.ReturnStatement => Evaluate<ReturnStatementNode>(node, scope, EvaluateReturnStatement),
@@ -450,6 +451,56 @@ public class RedstoneInterpreter
         }
         return new VoidValue();
     }
+
+    private RuntimeValue EvaluateForStatement(ForStatementNode node, Scope scope)
+{
+    loopStack.Push(NodeType.ForStatement);
+    
+    var loopScope = new Scope(scope);
+    
+    // Execute initializer: item i = 0
+    Evaluate(node.Initializer, loopScope);
+    
+    var IsTruthy = () => {
+        var value = Evaluate(node.Condition, loopScope);  // Use loopScope here
+        if (value is not BooleanValue b)
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: For statement expected a boolean value, but got {value.Type}.\nNode: {node}");   
+        }
+        return b.Value;
+    };
+    
+    try
+    {
+        while (IsTruthy())
+        {
+            try
+            {
+                // Execute body
+                var forStatementBody = node.Body.Statements;
+                var forBodyScope = new Scope(loopScope);  // Child of loopScope
+                EvaluateBlockStatement(forStatementBody, forBodyScope);
+                
+                // Execute increment: i = i + 1
+                Evaluate(node.Increment, loopScope);  // Increment in loopScope
+            }
+            catch (BreakSignal)
+            {
+                break;
+            }
+            catch (ContinueSignal)
+            {
+                continue;
+            }
+        }
+    }
+    finally
+    {
+        loopStack.Pop();   
+    }
+    
+    return new VoidValue();
+}
 
     private RuntimeValue EvaluateReturnStatement(ReturnStatementNode @return, Scope scope)
     {

@@ -1,0 +1,4 @@
+item maxCount = 7
+hopper (item n = 0, n < maxCount, n = n + 1) {
+    chat(n)
+}

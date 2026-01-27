@@ -1,5 +1,3 @@
-using System.Reflection.Emit;
-using RedstoneScript.Interpreter.Signals;
 using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
@@ -51,6 +49,8 @@ public class RedstoneParser
                 return ParseIfStatement();
             case TokenType.While:
                 return ParseWhileStatement();
+            case TokenType.For:
+                return ParseForStatement();
             case TokenType.Break:
                 return ParseBreakStatement();
             case TokenType.Continue:
@@ -222,6 +222,25 @@ public class RedstoneParser
         Match(TokenType.NewLine);
 
         return new ReturnStatementNode(returnExpression);
+    }
+
+    private StatementNode ParseForStatement()
+    {
+        Expect(TokenType.For);
+        Expect(TokenType.ParenthesisOpen);
+        
+        var initializer = ParseVariableDeclaration();
+        Expect(TokenType.Comma);
+        
+        var condition = ParseExpression();
+        Expect(TokenType.Comma);
+        
+        var increment = ParseAssignmentExpression();
+        Expect(TokenType.ParenthesisClose);
+        
+        var body = ParseBlockStatement();
+        
+        return new ForStatementNode(initializer, condition, increment, body);
     }
 
 #endregion
