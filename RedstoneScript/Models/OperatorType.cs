@@ -31,5 +31,5 @@ public static class OperatorType
 
     public const string OR = "||";
 
-    public const string UNARYNOT = "!";
+    public const string BANG = "!";
 }

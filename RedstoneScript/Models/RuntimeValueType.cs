@@ -10,5 +10,5 @@ public enum RuntimeValueType
     Object,
     NativeFunction,
     Function,
-    If
+    If,
 }

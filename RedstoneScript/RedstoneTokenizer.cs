@@ -32,37 +32,34 @@ public partial class RedstoneTokenizer
                 continue;
             }
 
-            // handles boolean operators like ==, !=, <, <=, >, >=
+            if (character == '/' && currentCharacterIndex + 1 < sourceCode.Length && sourceCode[currentCharacterIndex + 1] == '/')
+            {
+                // Skip until end of line or end of file
+                while (currentCharacterIndex < sourceCode.Length && sourceCode[currentCharacterIndex] != '\n')
+                {
+                    currentCharacterIndex++;
+                }
+                continue;
+            }
+
+            // handles boolean operators like ==, !=, <, <=, >, >=, and !
             if ("=!<>".Contains(character))
             {
                 char? next = (currentCharacterIndex + 1 < sourceCode.Length) ? sourceCode[currentCharacterIndex + 1] : null;
-                string combined = (next != null && !char.IsWhiteSpace(next.Value)) ? $"{character}{next}" : character.ToString();
-                switch (combined)
+                string? combined = next != null ? $"{character}{next}" : null;
+
+                if (combined == "==" || combined == "!=" || combined == "<=" || combined == ">=")
                 {
-                    case "==":
-                        tokens.Add(new Token("==",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
-                    case "!=":
-                        tokens.Add(new Token("!=",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
-                    case "<=":
-                        tokens.Add(new Token("<=",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
-                    case ">=":
-                        tokens.Add(new Token(">=",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
-                    case "<":
-                        tokens.Add(new Token("<",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
-                    case ">":
-                        tokens.Add(new Token(">",TokenType.Operator));
-                        currentCharacterIndex += 2;
-                        continue;
+                    tokens.Add(new Token(combined, TokenType.Operator));
+                    currentCharacterIndex += 2;
+                    continue;
+                }
+
+                if (character == '<' || character == '>' || character == '!')
+                {
+                    tokens.Add(new Token(character.ToString(), TokenType.Operator));
+                    currentCharacterIndex += 1;
+                    continue;
                 }
             }
 

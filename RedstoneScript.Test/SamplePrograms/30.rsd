@@ -1,5 +1,5 @@
 workbench simpleReturn() {
-    craft 5 // this should return empty
+    craft 5
 }
 
 item foo = {

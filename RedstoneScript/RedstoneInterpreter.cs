@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using RedstoneScript.AST;
 using RedstoneScript.Interpreter.Signals;
 
@@ -6,6 +7,7 @@ namespace RedstoneScript.Interpreter;
 public class RedstoneInterpreter
 {
     private Stack<NodeType> loopStack = new Stack<NodeType>();
+    private Stack<NodeType> callStack = new Stack<NodeType>();
     public RedstoneInterpreter()
     {}
 
@@ -64,6 +66,7 @@ public class RedstoneInterpreter
             NodeType.NumericLiteral => Evaluate(node, (NumericExpressionNode node) => new NumberValue(node.Value)),
             NodeType.StringLiteral => Evaluate(node, (StringExpressionNode node) => new StringValue(node.Value)),
             NodeType.BinaryExpression => Evaluate<BinaryExpressionNode>(node, scope, EvaluateBinaryExpression),
+            NodeType.UnaryExpression => Evaluate<UnaryExpressionNode>(node, scope, EvaluateUnaryExpression),
             NodeType.NullLiteral => new NullValue(),
             NodeType.BooleanLiteral => Evaluate(node, (BooleanExpressionNode node) => new BooleanValue(node.Value)),
             NodeType.VariableDeclaration => Evaluate<VariableDelarationNode>(node, scope, EvaluateVariableDeclarationStatement),
@@ -74,8 +77,10 @@ public class RedstoneInterpreter
             NodeType.FunctionDeclaration => Evaluate<FunctionDelarationNode>(node, scope, EvaluateFunctionDeclarationStatement),
             NodeType.IfStatement => Evaluate<IfStatementNode>(node, scope, EvaluateIfStatement),
             NodeType.WhileStatement => Evaluate<WhileSatementNode>(node, scope, EvaluateWhileStatement),
+            NodeType.ForStatement => Evaluate<ForStatementNode>(node, scope, EvaluateForStatement),
             NodeType.BreakStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new BreakSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'cut' used outside of a loop"),
             NodeType.ContinueStatement => loopStack.Any(type => type == NodeType.WhileStatement || type == NodeType.ForStatement) ? throw new ContinueSignal() : throw new InvalidOperationException($"Redstone Interpreter: 'pulse' used outside of a loop"),
+            NodeType.ReturnStatement => Evaluate<ReturnStatementNode>(node, scope, EvaluateReturnStatement),
             _ => throw new InvalidOperationException($"Redstone Interpreter: Unexpected Node during execution stage: {node.Type}. It could mean that it's not supported yet.\n{node}"),
         };
     }
@@ -83,6 +88,30 @@ public class RedstoneInterpreter
     private RuntimeValue EvaluateIdentifierExpression(IdentifierExpressionNode identifierExpressionNode, Scope scope)
     {
         return scope.ResolveVariable(identifierExpressionNode.Name);
+    }
+
+    private RuntimeValue EvaluateUnaryExpression(UnaryExpressionNode unaryExpressionNode, Scope scope)
+    {
+        var @operator = unaryExpressionNode.Operator;
+        var right = Evaluate(unaryExpressionNode.Right, scope);
+        if (@operator == OperatorType.SUBTRACTION)
+        {   
+            if (right is NumberValue number)
+            {
+                return new NumberValue(-number.Value);   
+            }
+            throw new InvalidOperationException($"Redstone Interpreter: Expected a number value for minus unary operator (-). Got {right.Type}");
+        }
+        else if (@operator == OperatorType.BANG)
+        {
+            if (right is BooleanValue boolean)
+            {
+                return new BooleanValue(!boolean.Value);
+            }
+            throw new InvalidOperationException($"Redstone Interpreter: Expected a boolean value for bang unary operator (!). Got {right.Type}");
+        }
+        
+        throw new InvalidOperationException($"Redstone Interpreter: Expected a unary operator (! or -). Got {unaryExpressionNode.Operator}");
     }
 
     private RuntimeValue EvaluateBinaryExpression(BinaryExpressionNode binaryExpressionNode, Scope scope)
@@ -257,7 +286,21 @@ public class RedstoneInterpreter
 
         if (functionValue is NativeFunctionValue nativeFunction)
         {
-            return nativeFunction.FunctionCall(arguments, scope);
+            // Push to callStack so return knows it's inside a function
+        callStack.Push(NodeType.CallExpression);
+            try
+            {
+                nativeFunction.FunctionCall(arguments, scope);
+                return new VoidValue();
+            }
+            catch (ReturnSignal @return)
+            {
+                return @return.Value;
+            }
+            finally
+            {
+                callStack.Pop();
+            }
         }
         else if (functionValue is FunctionValue function)
         {
@@ -274,7 +317,20 @@ public class RedstoneInterpreter
                 functionScope.DefineVariable(parameter, arguments[i], false);
             }
             
-            return EvaluateBlockStatement(function.Body, functionScope);
+            callStack.Push(NodeType.CallExpression);
+            try
+            {
+                EvaluateBlockStatement(function.Body, functionScope);
+                return new VoidValue();
+            }
+            catch(ReturnSignal @return)
+            {
+                return @return.Value;
+            }
+            finally
+            {
+                callStack.Pop();
+            }
         }
 
         throw new InvalidOperationException($"Redstone Interpreter: Could not determine function to run. got: {functionValue.Type}");
@@ -313,7 +369,7 @@ public class RedstoneInterpreter
         return scope.DefineVariable(name, newFunction, true);
     }
 
-    private RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope)
+    private RuntimeValue EvaluateBlockStatement(List<INode> statements, Scope scope, bool requiresReturn = false)
     {
         foreach (var statement in statements)
         {
@@ -394,6 +450,71 @@ public class RedstoneInterpreter
             loopStack.Pop();   
         }
         return new VoidValue();
+    }
+
+    private RuntimeValue EvaluateForStatement(ForStatementNode node, Scope scope)
+{
+    loopStack.Push(NodeType.ForStatement);
+    
+    var loopScope = new Scope(scope);
+    
+    // Execute initializer: item i = 0
+    Evaluate(node.Initializer, loopScope);
+    
+    var IsTruthy = () => {
+        var value = Evaluate(node.Condition, loopScope);  // Use loopScope here
+        if (value is not BooleanValue b)
+        {
+            throw new InvalidOperationException($"Redstone Interpreter: For statement expected a boolean value, but got {value.Type}.\nNode: {node}");   
+        }
+        return b.Value;
+    };
+    
+    try
+    {
+        while (IsTruthy())
+        {
+            try
+            {
+                // Execute body
+                var forStatementBody = node.Body.Statements;
+                var forBodyScope = new Scope(loopScope);  // Child of loopScope
+                EvaluateBlockStatement(forStatementBody, forBodyScope);
+                
+                // Execute increment: i = i + 1
+                Evaluate(node.Increment, loopScope);  // Increment in loopScope
+            }
+            catch (BreakSignal)
+            {
+                break;
+            }
+            catch (ContinueSignal)
+            {
+                continue;
+            }
+        }
+    }
+    finally
+    {
+        loopStack.Pop();   
+    }
+    
+    return new VoidValue();
+}
+
+    private RuntimeValue EvaluateReturnStatement(ReturnStatementNode @return, Scope scope)
+    {
+        // Make sure we're inside a function
+        if (!callStack.Any(type => type == NodeType.CallExpression))
+        {
+            throw new InvalidOperationException("Redstone Interpreter: 'craft' used outside of a function.");   
+        }
+
+        var value = @return.Value != null 
+                    ? Evaluate(@return.Value, scope)
+                    : new VoidValue();
+
+        throw new ReturnSignal(value);
     }
 
 #region Helpers

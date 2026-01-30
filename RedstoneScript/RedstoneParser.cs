@@ -1,4 +1,3 @@
-using RedstoneScript.Interpreter.Signals;
 using RedstoneScript.Lexer;
 
 namespace RedstoneScript.AST.Parser;
@@ -50,10 +49,14 @@ public class RedstoneParser
                 return ParseIfStatement();
             case TokenType.While:
                 return ParseWhileStatement();
+            case TokenType.For:
+                return ParseForStatement();
             case TokenType.Break:
                 return ParseBreakStatement();
             case TokenType.Continue:
                 return ParseContinueStatement();
+            case TokenType.Return:
+                return ParseReturnStatement();
             default:
                 return ParseExpression();
         }
@@ -116,7 +119,7 @@ public class RedstoneParser
     private StatementNode ParseVariableDeclaration()
     {
         var isConstant = Advance().Type == TokenType.Constant;
-        var identifierName = Expect(TokenType.Identifier, "Expected a variable name.").Value;
+        var identifierName = Expect(TokenType.Identifier, $"Expected a variable name. Got: {Current().Type} : {Current().Value}").Value;
         
         // check if it's any of the keywords that are restricted
         if (Keywords.TryGetKeyword(identifierName, out TokenType matched))
@@ -211,6 +214,35 @@ public class RedstoneParser
         Expect(TokenType.NewLine, "Redstone Node Parser: Expected a new line after a continue token");
         return new ContinueSignalNode();
     }
+
+    private StatementNode ParseReturnStatement()
+    {
+        Expect(TokenType.Return);
+        var returnExpression = ParseExpression();
+        Match(TokenType.NewLine);
+
+        return new ReturnStatementNode(returnExpression);
+    }
+
+    private StatementNode ParseForStatement()
+    {
+        Expect(TokenType.For);
+        Expect(TokenType.ParenthesisOpen);
+        
+        var initializer = ParseVariableDeclaration();
+        Expect(TokenType.Comma);
+        
+        var condition = ParseExpression();
+        Expect(TokenType.Comma);
+        
+        var increment = ParseAssignmentExpression();
+        Expect(TokenType.ParenthesisClose);
+        
+        var body = ParseBlockStatement();
+        
+        return new ForStatementNode(initializer, condition, increment, body);
+    }
+
 #endregion
 
 #region Expressions
@@ -221,6 +253,24 @@ public class RedstoneParser
     private ExpressionNode ParseExpression()
     {
         return ParseAssignmentExpression();
+    }
+
+    private ExpressionNode ParseAssignmentExpression()
+    {
+        var left = ParseComparisionExpression();
+
+        if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
+        {
+            if (!IsValidAssignmentTarget(left))
+            {
+                throw new InvalidOperationException("Invalid assignment target");   
+            }
+
+            var right = ParseAssignmentExpression();
+            return new AssignmentExpressionNode(left, right);
+        }
+
+        return left;
     }
 
     private ExpressionNode ParseComparisionExpression()
@@ -244,24 +294,6 @@ public class RedstoneParser
         return left;
     }
 
-    private ExpressionNode ParseMultiplicitiveExpression()
-    {
-        var left = ParseMemberCallExpression();
-
-        while(
-            IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
-            IsToken(TokenType.Operator, OperatorType.DIVISION) || 
-            IsToken(TokenType.Operator, OperatorType.MODULUS))
-        {
-            var operation = Advance().Value;
-            var right = ParseMemberCallExpression();
-            left = new BinaryExpressionNode(left, right, operation);
-        }
-
-
-        return left;
-    }
-
     private ExpressionNode ParseAdditiveExpression()
     {
         var left = ParseMultiplicitiveExpression();
@@ -278,74 +310,77 @@ public class RedstoneParser
         return left;
     }
 
-    private ExpressionNode ParseAssignmentExpression()
+    private ExpressionNode ParseMultiplicitiveExpression()
     {
-        var left = ParseComparisionExpression();
+        var left = ParseUnaryExpression();
 
-        if (Match(TokenType.Equals)) // if it's an equal tokentype. then we proceed and advance.
+        while(
+            IsToken(TokenType.Operator, OperatorType.MULTIPLICATION) ||
+            IsToken(TokenType.Operator, OperatorType.DIVISION) || 
+            IsToken(TokenType.Operator, OperatorType.MODULUS))
         {
-            if (!IsValidAssignmentTarget(left))
-            {
-                throw new InvalidOperationException("Invalid assignment target");   
-            }
-
-            var right = ParseAssignmentExpression();
-            return new AssignmentExpressionNode(left, right);
+            var operation = Advance().Value;
+            var right = ParseUnaryExpression();
+            left = new BinaryExpressionNode(left, right, operation);
         }
+
 
         return left;
     }
 
-    private ExpressionNode ParseObjectExpression()
+    private ExpressionNode ParseUnaryExpression()
     {
-        Expect(TokenType.BraceOpen);
-
-        // if we're here then we have just advanced past the {
-        var properties = new List<PropertyExpressionNode>();
-
-        // expect a new line character
-        Expect(TokenType.NewLine, "New line character expected for a object expression.");
-        SkipNewLines(); // skip any new leading new lines or empty white spaces
-        // { key }
-        while (!Check(TokenType.BraceClose)) // loop and parse while it's not end of file or a }
+        if (IsToken(TokenType.Operator, OperatorType.SUBTRACTION) || IsToken(TokenType.Operator, OperatorType.BANG))
         {
-            // // redstone is a new line sensative language so after {, it should expect a new line character.
-            properties.Add(ParsePropertyExpression());
-            
-            // After a property, match any new lines
-            if (!Match(TokenType.Comma)) // no comma it means it's the last property.
-            {
-                // After a property, match a new line.
-                while (Match(TokenType.NewLine)) { }
-
-                break;
-            }
-            else
-            {
-                 // if there is a comma, then we should expect a new line right after it.
-                while (Match(TokenType.NewLine)) { }
-            }            
+            var @operator = Advance().Value;
+            var right = ParseUnaryExpression();
+            return new UnaryExpressionNode(@operator, right);
         }
 
-        Expect(TokenType.BraceClose);
-
-        return new ObjectExpressionNode(properties);
+        return ParseMemberCallExpression();
     }
 
-    private PropertyExpressionNode ParsePropertyExpression()
+    private ExpressionNode ParseMemberCallExpression()
     {
-        var propertyName = Expect(TokenType.Identifier, $"Redstone Node Parser: property name must be of type identifier. Got: {Current().Type}").Value;
+        var member = ParseMemberExpression();
 
-        // a property should have this format
-        // key: value,
-        if (Match(TokenType.Colon))
+        if (Match(TokenType.ParenthesisOpen))
         {
-            var value = ParseExpression(); // aparently key: x = y + 1 is valid LOL
-            return new PropertyExpressionNode(propertyName, value);
+            return ParseCallExpression(member);
         }
 
-        // shorthand { key }
-        return new PropertyExpressionNode(propertyName);
+        return member;
+    }
+
+    private ExpressionNode ParseCallExpression(ExpressionNode memberCall)
+    {
+        ExpressionNode callExpression = new CallExpressionNode(memberCall, ParseCallArguments());
+
+        if (Match(TokenType.ParenthesisOpen))
+        {
+            callExpression = ParseCallExpression(callExpression);
+        }
+
+        return callExpression;
+    }
+
+    private ExpressionNode ParseMemberExpression()
+    {
+        var objectNode = ParsePrimaryExpression();
+
+        while (Match(TokenType.Dot))
+        {
+            var property = ParsePrimaryExpression(); // should be an identifier.
+
+            if (property.Type != NodeType.Identifier)
+            {
+                throw new InvalidOperationException($"Redstone Parser: Expected a NodeType.Identifier. Got: {property.Type}");
+            }
+
+            objectNode = new MemberAccessExpression(objectNode, property);
+        }
+
+        return objectNode;
     }
 
     private ExpressionNode ParsePrimaryExpression()
@@ -383,47 +418,56 @@ public class RedstoneParser
         }
     }
 
-    private ExpressionNode ParseCallExpression(ExpressionNode memberCall)
+    private ExpressionNode ParseObjectExpression()
     {
-        ExpressionNode callExpression = new CallExpressionNode(memberCall, ParseCallArguments());
+        Expect(TokenType.BraceOpen);
 
-        if (Match(TokenType.ParenthesisOpen))
+        // if we're here then we have just advanced past the {
+        var properties = new List<PropertyExpressionNode>();
+
+        // expect a new line character
+        Expect(TokenType.NewLine, "New line character expected for a object expression.");
+        SkipNewLines(); // skip any new leading new lines or empty white spaces
+        // { key }
+        while (!Check(TokenType.BraceClose)) // loop and parse while it's not end of file or a }
         {
-            callExpression = ParseCallExpression(callExpression);
-        }
-
-        return callExpression;
-    }
-
-    private ExpressionNode ParseMemberCallExpression()
-    {
-        var member = ParseMemberExpression();
-
-        if (Match(TokenType.ParenthesisOpen))
-        {
-            return ParseCallExpression(member);
-        }
-
-        return member;
-    }
-
-    private ExpressionNode ParseMemberExpression()
-    {
-        var objectNode = ParsePrimaryExpression();
-
-        while (Match(TokenType.Dot))
-        {
-            var property = ParsePrimaryExpression(); // should be an identifier.
-
-            if (property.Type != NodeType.Identifier)
+            // redstone is a new line sensative language so after {, it should expect a new line character.
+            properties.Add(ParsePropertyExpression());
+            
+            // After a property, match any new lines
+            if (!Match(TokenType.Comma)) // no comma it means it's the last property.
             {
-                throw new InvalidOperationException($"Redstone Parser: Expected a NodeType.Identifier. Got: {property.Type}");
-            }
+                // After a property, match a new line.
+                while (Match(TokenType.NewLine)) { }
 
-            objectNode = new MemberAccessExpression(objectNode, property);
+                break;
+            }
+            else
+            {
+                // if there is a comma, then we should expect a new line right after it.
+                while (Match(TokenType.NewLine)) { }
+            }            
         }
 
-        return objectNode;
+        Expect(TokenType.BraceClose);
+
+        return new ObjectExpressionNode(properties);
+    }
+
+    private PropertyExpressionNode ParsePropertyExpression()
+    {
+        var propertyName = Expect(TokenType.Identifier, $"Redstone Node Parser: property name must be of type identifier. Got: {Current().Type}").Value;
+
+        // a property should have this format
+        // key: value,
+        if (Match(TokenType.Colon))
+        {
+            var value = ParseExpression(); // aparently key: x = y + 1 is valid LOL
+            return new PropertyExpressionNode(propertyName, value);
+        }
+
+        // shorthand { key }
+        return new PropertyExpressionNode(propertyName);
     }
 
     private List<ExpressionNode> ParseCallArguments()

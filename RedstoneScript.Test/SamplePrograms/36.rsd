@@ -1,0 +1,3 @@
+hopper (item m = 0, m < 3, m = m + 1) {
+    chat(m)
+}

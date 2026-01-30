@@ -1,0 +1,6 @@
+workbench simpleReturn() {
+    craft 42
+}
+
+item a = simpleReturn()
+chat(a)

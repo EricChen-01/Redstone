@@ -1,7 +1,0 @@
-item p = {
-    x:10,
-    y:20
-}
-
-chat("p.x is ", p.x)
-chat("p.y is ", p.y)

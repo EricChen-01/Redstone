@@ -55,3 +55,11 @@
     pulse
   }
   ```
+
+
+## [0.0.4] - 1/27/26
+
+- Added return support
+- Added comments
+- Added Unary Operator 
+- Added For loop

@@ -1,0 +1,10 @@
+workbench outer() {
+    workbench inner() {
+        craft 99
+    }
+    item result = inner()
+    craft result
+}
+
+item d = outer()
+chat(d)

@@ -33,14 +33,6 @@ The goal of Redstone is to serve both as a learning project for language design 
 * If-else Statements
 * While loops
 
-### Known Limitation
-
-Negative numbers are not supported directly. They can be expressed using the negative native function for now:
-```
-negative(5)
-// returns -5
-```
-
 ---
 
 ## Language Keywords
@@ -57,6 +49,7 @@ negative(5)
 | `off`            | `false`                      |
 | `cut`            | `break`                      |
 | `pulse`          | `continue`                   |
+| `craft`          | `return`                     |
 
 Example:
 
@@ -165,9 +158,7 @@ Additional native functions will be added over time.
 
 Planned improvements include:
 
-* Native support for negative numbers
 * For loops
 * Expanded native function library
-* Unary Operators 
 
 ---
