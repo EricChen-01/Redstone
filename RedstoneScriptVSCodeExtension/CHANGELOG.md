@@ -25,7 +25,7 @@
 - Added else if keyword support
 - Added break and continue support
 
-## [0.0.4] - 
+## [0.0.4] - 1/29/26
 
 - Added return support
 - Added for loop support
